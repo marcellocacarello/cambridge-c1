@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Cambridge C1 — here we go!</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#111318;--s1:#1a1d24;--s2:#22262f;--s3:#2c3140;--border:#363c4e;
+  --text:#e8ecf4;--muted:#8892aa;--faint:#4a5268;
+  --blue:#4f8ef7;--blue2:#2563eb;--blue-dim:rgba(79,142,247,.12);--blue-mid:rgba(79,142,247,.2);
+  --green:#34d399;--green-dim:rgba(52,211,153,.12);--green-mid:rgba(52,211,153,.25);
+  --red:#f87171;--red-dim:rgba(248,113,113,.12);--red-mid:rgba(248,113,113,.25);
+  --amber:#fbbf24;--amber2:#d97706;--amber-dim:rgba(251,191,36,.1);--amber-mid:rgba(251,191,36,.2);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,.12);
+  --ff:"Space Grotesk",sans-serif;--fd:"Lora",serif;
+  --r:10px;--rl:14px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ff);font-size:14px;line-height:1.6;overflow:hidden}
+
+/* SHELL */
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#screen::-webkit-scrollbar{display:none}
+
+/* BOTTOM NAV */
+#bnav{background:var(--s1);border-top:1px solid var(--border);display:flex;padding:6px 0 max(10px,env(safe-area-inset-bottom));z-index:50;flex-shrink:0}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;font-weight:600;color:var(--faint);cursor:pointer;padding:4px 0;border:none;background:none;font-family:var(--ff);letter-spacing:.05em;text-transform:uppercase;transition:color .2s}
+.bn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bn.active{color:var(--blue)}
+
+/* PAGES */
+.page{display:none;min-height:100%}
+.page.active{display:block;animation:up .22s ease}
+@keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* STREAK HEADER */
+.streak-bar{padding:18px 16px 16px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.streak-bar::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 0%,rgba(79,142,247,.18),transparent 65%)}
+.sb-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:relative;z-index:1}
+.sb-left{display:flex;align-items:center;gap:10px}
+.sb-flame{font-size:30px}
+.sb-info{display:flex;flex-direction:column}
+.sb-num{font-family:var(--fd);font-size:28px;font-weight:600;color:#fff;line-height:1}
+.sb-lbl{font-size:10px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.07em;text-transform:uppercase}
+.sb-xp{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:rgba(255,255,255,.8)}
+.wdots{display:flex;gap:5px;position:relative;z-index:1}
+.wd{flex:1;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600}
+.wd-done{background:rgba(79,142,247,.3);color:#93c5fd}
+.wd-today{background:var(--blue);color:#fff;font-weight:700}
+.wd-miss{background:rgba(255,255,255,.05);color:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.06)}
+.wd-future{background:rgba(255,255,255,.04);color:rgba(255,255,255,.15)}
+
+/* PATH */
+.level-head{padding:20px 16px 4px;display:flex;align-items:center;gap:10px}
+.lvl-badge{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0}
+.level-line{flex:1;height:1px;background:var(--border)}
+.level-desc{font-size:12px;color:var(--muted);padding:4px 16px 16px;line-height:1.5}
+/* level badge colors */
+.lb-b2a{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.lb-b2b{background:rgba(251,191,36,.12);color:#f59e0b;border:1px solid rgba(251,191,36,.2)}
+.lb-b2pc{background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(52,211,153,.25)}
+.lb-b2pd{background:rgba(16,185,129,.1);color:#10b981;border:1px solid rgba(16,185,129,.2)}
+.lb-c1a{background:rgba(79,142,247,.15);color:#60a5fa;border:1px solid rgba(79,142,247,.3)}
+.lb-c1b{background:rgba(79,142,247,.12);color:#4f8ef7;border:1px solid rgba(79,142,247,.2)}
+.lb-c1c{background:rgba(79,142,247,.1);color:#3b82f6;border:1px solid rgba(79,142,247,.15)}
+.lb-c1d{background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.25)}
+.lb-c1e{background:rgba(99,102,241,.12);color:#6366f1;border:1px solid rgba(99,102,241,.2)}
+.lb-c1f{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.25)}
+.lb-c1g{background:rgba(139,92,246,.12);color:#8b5cf6;border:1px solid rgba(139,92,246,.2)}
+.lb-ex1{background:rgba(248,113,113,.15);color:#fca5a5;border:1px solid rgba(248,113,113,.25)}
+.lb-ex2{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+.lb-ex3{background:rgba(236,72,153,.15);color:#f9a8d4;border:1px solid rgba(236,72,153,.25)}
+.lb-ex4{background:rgba(236,72,153,.12);color:#ec4899;border:1px solid rgba(236,72,153,.2)}
+.lb-ex5{background:rgba(234,179,8,.15);color:#fde047;border:1px solid rgba(234,179,8,.3)}
+
+/* PATH NODES */
+.path-col{display:flex;flex-direction:column;align-items:center;padding:0 16px 4px}
+.path-row{display:flex;width:100%;padding:2px 0}
+.path-row.c{justify-content:center}
+.path-row.l{justify-content:flex-start;padding-left:20px}
+.path-row.r{justify-content:flex-end;padding-right:20px}
+.pnode{width:66px;height:66px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;position:relative;user-select:none;flex-shrink:0;border:2.5px solid transparent}
+.pnode:active{transform:scale(.91)}
+.nd-today{background:var(--blue);border-color:var(--blue2);box-shadow:0 0 0 7px rgba(79,142,247,.15),0 4px 16px rgba(79,142,247,.4)}
+.nd-done{background:var(--green-dim);border-color:var(--green)}
+.nd-free{background:var(--s2);border-color:var(--border)}
+.nd-locked{background:var(--s1);border-color:var(--faint);opacity:.4;cursor:not-allowed}
+.nd-exam{background:var(--purple-dim);border-color:var(--purple)}
+.nd-exam.nd-today{background:var(--blue);border-color:var(--blue2)}
+.nd-icon{font-size:24px;line-height:1}
+.nd-lbl{position:absolute;bottom:-19px;font-size:9px;white-space:nowrap;color:var(--muted);font-weight:600;letter-spacing:.02em}
+.nd-xp{position:absolute;top:-3px;right:-3px;background:var(--green);color:#052e16;font-size:8px;font-weight:700;padding:2px 5px;border-radius:8px;line-height:1.3}
+.pconn{width:2px;height:16px;background:var(--border);border-radius:1px;margin:1px 0}
+.pconn.done{background:var(--green)}
+
+/* SESSION */
+#page-session{background:var(--bg)}
+.sess-head{background:var(--s1);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.exit-btn{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--ff);white-space:nowrap;flex-shrink:0}
+.pbar-wrap{flex:1}
+.pbar-info{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500}
+.pbar{height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
+.pbar-fill{height:100%;background:linear-gradient(90deg,var(--blue2),var(--blue));border-radius:3px;transition:width .4s}
+.sess-body{padding:14px 16px}
+.q-chip{display:inline-flex;align-items:center;background:var(--blue-dim);color:var(--blue);font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:8px;border:1px solid var(--blue-mid)}
+.q-instr{font-size:12px;color:#c8d3e8;background:var(--s2);border-left:3px solid var(--amber);padding:9px 12px;border-radius:0 var(--r) var(--r) 0;margin-bottom:14px;line-height:1.55}
+.q-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:12px}
+.q-text{font-size:14px;line-height:1.85;color:var(--text)}
+.q-text b{font-weight:700;color:var(--amber);background:var(--amber-dim);padding:0 4px;border-radius:4px}
+.q-text em{color:var(--muted);font-style:italic;font-size:12px;display:block;margin-top:6px}
+.passage-text{font-size:13px;color:#b8c4d8;font-style:italic;margin-bottom:12px;line-height:1.75;border-left:3px solid var(--blue-mid);padding-left:10px}
+.ans-inp{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:var(--r);padding:11px 14px;color:var(--text);font-family:var(--ff);font-size:14px;outline:none;transition:border-color .2s;margin-top:10px}
+.ans-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.1)}
+.ans-inp.ok{border-color:var(--green);background:var(--green-dim);color:var(--text)}
+.ans-inp.err{border-color:var(--red);background:var(--red-dim);color:var(--text)}
+textarea.ans-inp{resize:vertical;min-height:140px;line-height:1.6;margin-top:0}
+.mc-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.mc-opt{padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:13px;display:flex;gap:10px;align-items:flex-start;line-height:1.45;background:var(--s2);transition:all .15s;color:var(--text)}
+.mc-opt:hover{border-color:var(--blue);background:var(--blue-dim)}
+.mc-opt.sel{border-color:var(--blue);background:var(--blue-dim)}
+.mc-opt.ok{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.mc-opt.err{border-color:var(--red);background:var(--red-dim);color:var(--red)}
+.mc-letter{font-weight:700;color:var(--blue);min-width:18px;flex-shrink:0}
+.mc-opt.ok .mc-letter{color:var(--green)}
+.mc-opt.err .mc-letter{color:var(--red)}
+.fb{background:var(--s2);border-radius:var(--r);padding:12px 14px;margin-top:10px;font-size:13px;line-height:1.7;display:none;border-left:3px solid var(--border);color:var(--text)}
+.fb.show{display:block}
+.fb.ok{border-color:var(--green);background:var(--green-dim)}
+.fb.err{border-color:var(--red);background:var(--red-dim)}
+.fb.ai{border-color:var(--blue);background:var(--blue-dim)}
+.fb.info{border-color:var(--amber);background:var(--amber-dim)}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin:0 3px 3px 0}
+.tag-g{background:var(--green-mid);color:var(--green)}
+.tag-r{background:var(--red-mid);color:var(--red)}
+.tag-b{background:var(--blue-mid);color:var(--blue)}
+.tag-a{background:var(--amber-mid);color:var(--amber)}
+.btns{display:flex;flex-direction:column;gap:8px}
+.btn{width:100%;padding:13px;border:none;border-radius:var(--r);font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.03em;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(79,142,247,.3)}
+.btn-blue:hover{background:var(--blue2)}
+.btn-ghost{background:var(--s2);border:1.5px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+
+/* SESSION DONE */
+.done-wrap{padding:28px 16px;text-align:center}
+.done-icon{font-size:64px;margin-bottom:12px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.done-title{font-family:var(--fd);font-size:26px;font-weight:600;color:var(--text);margin-bottom:4px}
+.done-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.ring{width:96px;height:96px;margin:0 auto 20px;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:20px;font-weight:600;color:var(--blue)}
+.result-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:14px;text-align:left;margin-bottom:16px;font-size:13px;color:var(--muted);line-height:1.6}
+
+/* VOCAB */
+.page-header{padding:20px 16px 0}
+.page-title{font-family:var(--fd);font-size:24px;font-weight:600;margin-bottom:3px;color:var(--text)}
+.page-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.chip-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;padding:0 16px}
+.chip{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--ff);transition:all .2s}
+.chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.vocab-body{padding:0 16px}
+.fc{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:20px 16px;text-align:center;min-height:148px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:10px;transition:all .2s;position:relative}
+.fc:hover{border-color:var(--blue);background:var(--s2)}
+.fc-word{font-family:var(--fd);font-size:26px;font-weight:600;color:var(--blue);margin-bottom:3px}
+.fc-type{font-size:10px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.fc-def{font-size:13px;color:var(--text);display:none;line-height:1.6;margin-bottom:6px}
+.fc-ex{font-size:12px;color:var(--muted);font-style:italic;display:none;line-height:1.5}
+.fc-col{font-size:11px;color:var(--blue);display:none;margin-top:5px;font-weight:600}
+.fc-hint{font-size:11px;color:var(--faint);margin-top:6px}
+.fc-star{position:absolute;top:12px;right:14px;font-size:18px;cursor:pointer;color:var(--faint);transition:color .2s}
+.fc-star.on{color:var(--amber)}
+.drill-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:10px}
+.drill-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.drill-opt{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:9px 10px;font-size:12px;cursor:pointer;text-align:center;transition:all .15s;font-family:var(--ff);line-height:1.4;color:var(--text)}
+.drill-opt:hover{border-color:var(--blue);background:var(--blue-dim)}
+.drill-opt.ok{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.drill-opt.err{border-color:var(--red);background:var(--red-dim);color:var(--red)}
+/* VOCAB MODE GRID */
+.vmode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.vmode-card{background:var(--s2);border:1.5px solid var(--border);border-radius:var(--rl);padding:10px 4px 8px;cursor:pointer;font-family:var(--ff);transition:all .2s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.vmode-card:hover{border-color:var(--blue);background:var(--blue-dim)}
+.vmode-card.active{border-color:var(--blue);background:var(--blue-dim)}
+.vmode-icon{font-size:20px;line-height:1;margin-bottom:2px}
+.vmode-name{font-size:10px;font-weight:700;color:var(--text);letter-spacing:.02em}
+.vmode-desc{font-size:9px;color:var(--muted)}
+/* WRITE MODE */
+.write-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:18px 16px;margin-bottom:10px}
+.write-def{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:4px}
+.write-type{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.write-ex{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:12px;padding:8px 10px;background:var(--s2);border-radius:var(--r);line-height:1.5}
+.write-hint{font-size:11px;color:var(--faint);margin-top:6px;cursor:pointer}
+.write-letters{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.write-letter{width:22px;height:22px;background:var(--s3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted)}
+/* MATCH MODE */
+.match-area{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.match-col{display:flex;flex-direction:column;gap:7px}
+.match-item{padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:13px;cursor:pointer;transition:all .15s;line-height:1.4;text-align:center;background:var(--s2);color:var(--text);user-select:none}
+.match-item:hover{border-color:var(--blue)}
+.match-item.selected{border-color:var(--blue);background:var(--blue-dim);color:var(--blue)}
+.match-item.matched{border-color:var(--green);background:var(--green-dim);color:var(--green);cursor:default;opacity:.7}
+.match-item.wrong{border-color:var(--red);background:var(--red-dim);animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.match-score{text-align:center;font-size:13px;color:var(--muted);margin-bottom:8px}
+/* FILL MODE */
+.fill-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:18px 16px;margin-bottom:10px}
+.fill-sentence{font-size:15px;line-height:1.9;color:var(--text);margin-bottom:12px}
+.fill-blank{display:inline-block;min-width:80px;border-bottom:2px solid var(--blue);text-align:center;color:var(--blue);font-weight:600;padding:0 4px}
+.fill-inp{background:var(--s2);border:1.5px solid var(--blue);border-radius:var(--r);padding:8px 12px;color:var(--text);font-family:var(--ff);font-size:14px;outline:none;width:100%;margin-top:8px;transition:border-color .2s}
+.fill-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.1)}
+.fill-inp.ok{border-color:var(--green);background:var(--green-dim)}
+.fill-inp.err{border-color:var(--red);background:var(--red-dim)}
+/* SCORE TRACKER */
+.vocab-score{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:var(--r);padding:8px 12px;margin:0 16px 10px;font-size:12px;color:var(--muted)}
+.vocab-score-num{font-family:var(--fd);font-size:18px;color:var(--blue);font-weight:600}
+/* WRITING REDESIGN */
+.w-task-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:14px;overflow:hidden}
+.w-task-header{background:linear-gradient(135deg,#1e3a5f,#1e40af);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.w-task-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#fff;letter-spacing:.05em;text-transform:uppercase}
+.w-task-title{font-size:13px;font-weight:600;color:#fff}
+.w-task-body{padding:14px 16px}
+.w-task-prompt{font-size:13px;line-height:1.75;color:var(--text);margin-bottom:12px}
+.w-task-points{display:flex;flex-direction:column;gap:6px}
+.w-task-point{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#b8c4d8;line-height:1.5}
+.w-task-point::before{content:"→";color:var(--blue);font-weight:700;flex-shrink:0;margin-top:1px}
+.w-criteria-bar{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
+.w-crit{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;align-items:flex-start;gap:8px}
+.w-crit-icon{font-size:16px;flex-shrink:0}
+.w-crit-text{flex:1}
+.w-crit-name{font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px}
+.w-crit-desc{font-size:11px;color:var(--muted);line-height:1.35}
+/* FEEDBACK REDESIGN */
+.w-fb-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-top:14px;display:none}
+.w-fb-card.show{display:block}
+.w-fb-header{background:linear-gradient(135deg,#1e3a5f,#1e2d4a);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.w-fb-title{font-size:13px;font-weight:700;color:#fff}
+.w-fb-band{background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.w-fb-body{padding:14px 16px}
+.w-fb-crit{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.w-fb-crit:last-child{border-bottom:none}
+.w-fb-crit-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.w-fb-crit-content{flex:1}
+.w-fb-crit-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:2px}
+.w-fb-crit-text{font-size:13px;color:var(--text);line-height:1.5}
+.w-fb-band-dot{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.band-5{background:rgba(52,211,153,.2);color:var(--green)}
+.band-4{background:rgba(79,142,247,.2);color:var(--blue)}
+.band-3{background:rgba(251,191,36,.2);color:var(--amber)}
+.band-2{background:rgba(248,113,113,.2);color:var(--red)}
+.band-1{background:rgba(248,113,113,.15);color:var(--red)}
+.w-fb-tip{background:var(--amber-dim);border-left:3px solid var(--amber);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;margin-top:12px;font-size:13px;color:var(--text);line-height:1.5}
+.w-fb-tip-label{font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+
+/* WRITING */
+.writing-body{padding:0 16px 16px}
+.crit-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
+.crit{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:9px 10px}
+.crit-name{font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.05em;text-transform:uppercase;margin-bottom:2px}
+.crit-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.genre-sel{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-family:var(--ff);font-size:13px;outline:none;margin-bottom:10px;cursor:pointer}
+.genre-sel:focus{border-color:var(--blue)}
+.w-prompt{background:var(--s2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 var(--r) var(--r) 0;padding:14px;margin-bottom:12px;font-size:13px;line-height:1.7;color:var(--text);display:none}
+.wc-bar{display:flex;justify-content:space-between;font-size:11px;margin-top:5px}
+.wc-ok{color:var(--green);font-weight:600}
+.wc-over{color:var(--red);font-weight:600}
+.wc-low{color:var(--faint)}
+
+/* STATS */
+.stats-body{padding:0 16px 20px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.stat-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:14px;text-align:center}
+.stat-num{font-family:var(--fd);font-size:30px;font-weight:600;color:var(--blue);line-height:1}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;margin:16px 0 8px}
+.skill-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.skill-name{font-size:12px;min-width:88px;color:var(--text)}
+.skill-bg{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.skill-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue2),var(--blue));transition:width .6s .1s}
+.skill-pct{font-size:11px;color:var(--muted);min-width:30px;text-align:right;font-weight:600}
+.res-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px}
+.res-title{font-size:13px;font-weight:600;margin-bottom:3px;color:var(--text)}
+.res-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:4px}
+
+/* CELEBRATION */
+#cel{position:fixed;inset:0;background:rgba(17,19,24,.95);display:none;z-index:200;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+#cel.show{display:flex;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.cel-icon{font-size:72px;margin-bottom:14px;animation:pop .5s cubic-bezier(.34,1.56,.64,1) .1s both}
+.cel-title{font-family:var(--fd);font-size:30px;font-weight:600;color:var(--blue);margin-bottom:6px}
+.cel-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+.dots::after{content:'...';animation:dt 1s infinite steps(3)}
+@keyframes dt{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
+</style>
+</head>
+<body>
+<div id="app">
+ <div id="screen">
+
+  <!-- PATH -->
+  <div id="page-path" class="page active">
+   <div class="streak-bar">
+    <div class="sb-top">
+     <div class="sb-left">
+      <div class="sb-flame">🔥</div>
+      <div class="sb-info">
+       <div class="sb-num" id="s-num">0</div>
+       <div class="sb-lbl">Day streak</div>
+      </div>
+     </div>
+     <div class="sb-xp">⚡ <span id="s-xp">0</span> XP total</div>
+    </div>
+    <div class="wdots" id="wdots"></div>
+   </div>
+   <div id="path-wrap"></div>
+  </div>
+
+  <!-- SESSION -->
+  <div id="page-session" class="page">
+   <div id="sess-active">
+    <div class="sess-head">
+     <button class="exit-btn" onclick="exitSess()">← Exit</button>
+     <div class="pbar-wrap">
+      <div class="pbar-info"><span id="sess-lbl">Exercise</span><span id="sess-ctr">1/5</span></div>
+      <div class="pbar"><div class="pbar-fill" id="sess-pb" style="width:0%"></div></div>
+     </div>
+    </div>
+    <div class="sess-body">
+     <div class="q-chip" id="q-chip">Part 1</div>
+     <div class="q-instr" id="q-instr"></div>
+     <div class="q-card">
+      <div class="q-text" id="q-text"></div>
+      <div id="q-input"></div>
+      <div class="fb" id="q-fb"></div>
+     </div>
+     <div class="btns">
+      <button class="btn btn-blue" id="btn-check" onclick="checkQ()">Check answer</button>
+      <button class="btn btn-ghost" id="btn-next" style="display:none" onclick="nextQ()">Next →</button>
+      <button class="btn btn-ghost" id="btn-ai" onclick="getAIQ()">✨ AI question instead</button>
+     </div>
+    </div>
+   </div>
+   <div id="sess-done" style="display:none">
+    <div class="done-wrap">
+     <div class="done-icon" id="done-icon">🎉</div>
+     <div class="done-title" id="done-title">Well done!</div>
+     <div class="done-sub" id="done-sub"></div>
+     <div class="ring">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+       <circle cx="48" cy="48" r="40" fill="none" stroke="var(--s3)" stroke-width="8"/>
+       <circle cx="48" cy="48" r="40" fill="none" stroke="var(--blue)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251" id="ring-arc" style="stroke-dashoffset:251;transition:stroke-dashoffset 1s .3s"/>
+      </svg>
+      <div class="ring-pct" id="ring-pct">0%</div>
+     </div>
+     <div class="result-card" id="result-detail"></div>
+     <div class="btns">
+      <button class="btn btn-blue" onclick="backToPath()">Back to path</button>
+      <button class="btn btn-ghost" onclick="keepGoing()">Keep going →</button>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- VOCAB -->
+  <div id="page-vocab" class="page">
+   <div class="page-header">
+    <div class="page-title">Vocabulary</div>
+    <div class="page-sub">Choose a mode and a category</div>
+   </div>
+   <div style="padding:0 16px 14px;display:flex;flex-direction:column;gap:10px">
+    <div>
+     <div style="font-size:10px;font-weight:700;color:var(--faint);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px">Learning mode</div>
+     <div id="vmode-box" onclick="openSheet('mode')" style="background:var(--s1);border:1.5px solid var(--blue);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer">
+      <span id="vmode-icon" style="font-size:20px">🃏</span>
+      <span id="vmode-text" style="flex:1;font-size:13px;font-weight:600;color:var(--text)">Flashcards</span>
+      <span style="color:var(--muted);font-size:12px">▾</span>
+     </div>
+    </div>
+    <div>
+     <div style="font-size:10px;font-weight:700;color:var(--faint);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px">Word category</div>
+     <div id="vcat-box" onclick="openSheet('cat')" style="background:var(--s1);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer">
+      <span id="vcat-icon" style="font-size:20px">📚</span>
+      <span id="vcat-text" style="flex:1;font-size:13px;font-weight:600;color:var(--text)">All words</span>
+      <span style="color:var(--muted);font-size:12px">▾</span>
+     </div>
+    </div>
+    <div style="display:flex;gap:8px">
+     <button class="chip" id="chip-enc" onclick="pickCat('encountered','📖','Encountered')" style="flex:1;padding:10px 8px;text-align:center">📖 Encountered</button>
+     <button class="chip" id="chip-star" onclick="pickCat('starred','★','Saved')" style="flex:1;padding:10px 8px;text-align:center">★ Saved</button>
+    </div>
+   </div>
+   <div class="vocab-body" id="vocab-body"></div>
+   <div style="padding:4px 16px 20px">
+    <button class="btn btn-ghost" onclick="loadMoreV()">✨ Load more words</button>
+   </div>
+  </div>
+    <!-- WRITING -->
+  <div id="page-writing" class="page">
+   <div class="page-header">
+    <div class="page-title">Writing</div>
+    <div class="page-sub">AI feedback · 4 official CAE criteria · honest grading</div>
+   </div>
+   <div class="writing-body">
+    <!-- CRITERIA CARDS -->
+    <div class="w-criteria-bar">
+     <div class="w-crit"><div class="w-crit-icon">📌</div><div class="w-crit-text"><div class="w-crit-name">Content</div><div class="w-crit-desc">All task points covered</div></div></div>
+     <div class="w-crit"><div class="w-crit-icon">🗣️</div><div class="w-crit-text"><div class="w-crit-name">Comm. Achievement</div><div class="w-crit-desc">Register, tone, impact</div></div></div>
+     <div class="w-crit"><div class="w-crit-icon">🏗️</div><div class="w-crit-text"><div class="w-crit-name">Organisation</div><div class="w-crit-desc">Cohesion, paragraphing</div></div></div>
+     <div class="w-crit"><div class="w-crit-icon">💬</div><div class="w-crit-text"><div class="w-crit-name">Language</div><div class="w-crit-desc">Range, accuracy, C1 vocab</div></div></div>
+    </div>
+    <!-- GENRE + TASK -->
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+     <select class="genre-sel" id="w-genre" style="margin-bottom:0;flex:1">
+      <option value="essay">Essay (Part 1)</option>
+      <option value="report">Report</option>
+      <option value="review">Review</option>
+      <option value="formal-letter">Formal letter</option>
+      <option value="proposal">Proposal</option>
+     </select>
+     <button class="btn btn-ghost" style="width:auto;padding:10px 14px;white-space:nowrap" onclick="getWPrompt()">✨ Get task</button>
+    </div>
+    <!-- TASK CARD -->
+    <div id="w-task-card" class="w-task-card" style="display:none">
+     <div class="w-task-header">
+      <span class="w-task-badge" id="w-task-badge">Essay</span>
+      <span class="w-task-title">CAE Writing Task</span>
+     </div>
+     <div class="w-task-body">
+      <div class="w-task-prompt" id="w-task-prompt"></div>
+      <div class="w-task-points" id="w-task-points"></div>
+     </div>
+    </div>
+    <!-- WRITE AREA -->
+    <div style="position:relative;margin-bottom:4px">
+     <textarea class="ans-inp" id="w-text" placeholder="Write your response here (220–260 words)..." oninput="updateWC()" style="min-height:200px;padding-bottom:36px"></textarea>
+     <div style="position:absolute;bottom:10px;right:12px;display:flex;align-items:center;gap:8px">
+      <div style="height:5px;width:80px;background:var(--s3);border-radius:3px;overflow:hidden"><div id="wc-bar-fill" style="height:100%;background:var(--blue);border-radius:3px;width:0%;transition:width .3s"></div></div>
+      <span class="wc-low" id="wc-n" style="font-size:11px;font-weight:600;white-space:nowrap">0 / 260</span>
+     </div>
+    </div>
+    <button class="btn btn-blue" style="margin-top:8px" onclick="submitW()">📊 Get AI feedback</button>
+    <!-- FEEDBACK CARD -->
+    <div class="w-fb-card" id="w-fb-card" style="display:none">
+     <div class="w-fb-header">
+      <span class="w-fb-title">📊 CAE Examiner Feedback</span>
+      <span class="w-fb-band" id="w-fb-band">Band —/5</span>
+     </div>
+     <div class="w-fb-body" id="w-fb-body"></div>
+    </div>
+    <!-- MODEL ANSWER -->
+    <div id="w-model-wrap" style="margin-top:10px;display:none">
+     <button class="btn btn-ghost" onclick="getModelAns()">📝 Show model answer</button>
+     <div class="fb ai" id="w-model" style="margin-top:10px"></div>
+    </div>
+   </div>
+  </div>
+
+  <!-- STATS -->
+  <div id="page-stats" class="page">
+   <div class="page-header">
+    <div class="page-title">Progress</div>
+    <div class="page-sub">Track your improvement over time</div>
+   </div>
+   <div class="stats-body">
+    <div class="stat-grid">
+     <div class="stat-box"><div class="stat-num" id="st-s">0</div><div class="stat-lbl">Streak</div></div>
+     <div class="stat-box"><div class="stat-num" id="st-e">0</div><div class="stat-lbl">Exercises</div></div>
+     <div class="stat-box"><div class="stat-num" id="st-a">—</div><div class="stat-lbl">Accuracy</div></div>
+     <div class="stat-box"><div class="stat-num" id="st-d">0</div><div class="stat-lbl">Days studied</div></div>
+    </div>
+    <div class="sec-lbl">Accuracy by skill</div>
+    <div id="skill-bars"></div>
+    <div class="sec-lbl">Weak areas</div>
+    <div id="weak-areas" style="font-size:13px;color:var(--muted)">Complete more exercises to see patterns.</div>
+    <div class="sec-lbl">Resources</div>
+    <div class="res-card"><div class="res-title">🎧 BBC 6 Minute English</div><div class="res-desc">Short audio with transcripts. Great for listening on the go.</div><a href="https://www.bbc.co.uk/learningenglish" style="font-size:11px;color:var(--blue)">bbc.co.uk/learningenglish ↗</a></div>
+    <div class="res-card"><div class="res-title">🗣️ Speaking — Claude Voice</div><div class="res-desc">Open Claude mobile → voice mode. Ask it to be a CAE examiner for Part 2 / Part 3 practice.</div></div>
+    <div class="res-card"><div class="res-title">📄 Cambridge official prep</div><a href="https://www.cambridgeenglish.org/exams-and-tests/advanced/preparation/" style="font-size:11px;color:var(--blue)">cambridgeenglish.org ↗</a></div>
+    <div class="sec-lbl">Diagnostic</div>
+    <div class="res-card"><div class="res-title">Retake baseline test</div><div class="res-desc">Redo anytime to measure improvement.</div><button class="btn btn-ghost" style="margin-top:8px;padding:8px 14px;width:auto;font-size:12px" onclick="goTab('diag')">Take diagnostic →</button></div>
+   </div>
+  </div>
+
+  <!-- DIAGNOSTIC -->
+  <div id="page-diag" class="page">
+   <div id="diag-intro" style="padding:32px 16px;text-align:center">
+    <div style="font-size:52px;margin-bottom:12px">🎓</div>
+    <div style="font-family:var(--fd);font-size:26px;font-weight:600;margin-bottom:8px;color:var(--text)">Baseline Test</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">Tests Use of English, Reading and Writing.<br>~15 minutes. Sets your starting level.</div>
+    <div class="res-card" style="text-align:left;margin-bottom:20px">
+     <div style="display:flex;gap:5px;flex-wrap:wrap"><span class="tag tag-b">Use of English</span><span class="tag tag-g">Reading</span><span class="tag tag-a">Writing paragraph</span></div>
+     <div style="font-size:12px;color:var(--muted);margin-top:8px">Based on real Cambridge Advanced exam questions</div>
+    </div>
+    <button class="btn btn-blue" onclick="beginDiag()">Start baseline test →</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="skipDiag()">Skip — start learning</button>
+   </div>
+   <div id="diag-sess" style="display:none">
+    <div class="sess-head">
+     <div style="font-size:12px;font-weight:600;color:var(--muted)" id="dp-lbl">Diagnostic</div>
+     <div class="pbar-wrap">
+      <div class="pbar-info"><span>Baseline test</span><span id="dp-ctr">1/8</span></div>
+      <div class="pbar"><div class="pbar-fill" id="dp-pb" style="width:0%"></div></div>
+     </div>
+    </div>
+    <div class="sess-body">
+     <div class="q-chip" id="dp-chip">Part 1</div>
+     <div class="q-instr" id="dp-instr"></div>
+     <div class="q-card">
+      <div class="q-text" id="dp-q"></div>
+      <div id="dp-input"></div>
+      <div class="fb" id="dp-fb"></div>
+     </div>
+     <div class="btns">
+      <button class="btn btn-blue" id="dp-check" onclick="checkDiag()">Check</button>
+      <button class="btn btn-ghost" id="dp-next" style="display:none" onclick="nextDiag()">Next →</button>
+     </div>
+    </div>
+   </div>
+   <div id="diag-result" style="display:none;padding:20px 16px">
+    <div style="text-align:center;margin-bottom:20px">
+     <div style="font-size:48px;margin-bottom:10px">📊</div>
+     <div style="font-family:var(--fd);font-size:24px;font-weight:600;margin-bottom:6px;color:var(--text)">Your baseline</div>
+     <div style="font-size:13px;color:var(--muted)" id="dr-summary"></div>
+    </div>
+    <div class="res-card" id="dr-detail"></div>
+    <div class="res-card" id="dr-wfb"></div>
+    <button class="btn btn-blue" style="margin-top:12px" onclick="finishDiag()">Start learning →</button>
+   </div>
+  </div>
+
+ </div>
+
+ <nav id="bnav" style="display:none">
+  <button class="bn active" id="nav-path" onclick="goTab('path')">
+   <svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>Path
+  </button>
+  <button class="bn" id="nav-vocab" onclick="goTab('vocab')">
+   <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Vocab
+  </button>
+  <button class="bn" id="nav-writing" onclick="goTab('writing')">
+   <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>Writing
+  </button>
+  <button class="bn" id="nav-stats" onclick="goTab('stats')">
+   <svg viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>Stats
+  </button>
+ </nav>
+
+ <div id="cel">
+  <div class="cel-icon" id="cel-i">🎉</div>
+  <div class="cel-title" id="cel-t">Well done!</div>
+  <div class="cel-sub" id="cel-s"></div>
+  <button class="btn btn-blue" style="max-width:180px" onclick="closeCel()">Continue</button>
+ </div>
+</div>
+
+ <!-- BOTTOM SHEET -->
+ <!-- API KEY MODAL -->
+ <div id="key-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--s1);border-radius:16px;padding:24px;width:100%;max-width:360px">
+   <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px">🔑 API Key needed</div>
+   <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">To use AI features, enter your Anthropic API key.<br><br>Get one free at <strong style="color:var(--blue)">console.anthropic.com</strong> → API Keys → Create Key</div>
+   <input id="key-inp" type="text" placeholder="sk-ant-api03-..." style="width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:13px;font-family:monospace;outline:none;margin-bottom:8px">
+   <div id="key-err" style="display:none;font-size:12px;color:var(--red);margin-bottom:8px">Key must start with sk-ant-...</div>
+   <button onclick="submitKey()" style="width:100%;background:var(--blue);border:none;border-radius:8px;padding:13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--ff)">Save & continue</button>
+   <button onclick="document.getElementById('key-modal').style.display='none';_aiResolvers.splice(0).forEach(function(cb){cb('');})" style="width:100%;background:none;border:none;padding:10px;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px;font-family:var(--ff)">Cancel</button>
+  </div>
+ </div>
+ <div id="vsheet-bg" onclick="closeSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400"></div>
+ <div id="vsheet" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--s1);border-radius:20px 20px 0 0;z-index:401;max-height:75vh;overflow-y:auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--s1)">
+   <span id="vsheet-title" style="font-size:13px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em"></span>
+   <button onclick="closeSheet()" style="background:var(--s2);border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center">✕</button>
+  </div>
+  <div id="vsheet-body"></div>
+ </div>
+
+<script>
+
+var _aiResolvers=[];
+
+function showKeyModal(cb){
+  var modal=document.getElementById('key-modal');
+  if(modal){modal.style.display='flex';_aiResolvers.push(cb);}
+  else cb('');
+}
+function submitKey(){
+  var inp=document.getElementById('key-inp');
+  var k=(inp?inp.value:'').trim();
+  if(k.startsWith('sk-')){
+    localStorage.setItem('cae_api_key',k);
+    document.getElementById('key-modal').style.display='none';
+    inp.value='';
+    var cbs=_aiResolvers.splice(0);
+    cbs.forEach(function(cb){cb(k);});
+  } else {
+    document.getElementById('key-err').style.display='block';
+  }
+}
+function resetKey(){
+  localStorage.removeItem('cae_api_key');
+  alert('API key cleared.');
+}
+
+async function ai(p,s,m=800){
+  try{
+    var r=await fetch('/api/ai',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({max_tokens:m,system:s||'',messages:[{role:'user',content:p}]})
+    });
+    var d=await r.json();
+    if(d.error){return '';}
+    return (d.content&&d.content[0]&&d.content[0].text)||'';
+  }catch(e){return '';}
+}
+
+
+// ═══════════════════════════════════════════
+// QUESTION BANKS
+// ═══════════════════════════════════════════
+const B2_MCC=[
+  {text:"The children were very excited <b>___</b> going to the zoo.",opts:["A about","B for","C of","D with"],ans:"A",exp:"'Excited about' — fixed adjective-preposition. Never 'excited for/of' in this context."},
+  {text:"She had to <b>___</b> a decision about her future career.",opts:["A do","B make","C take","D have"],ans:"B",exp:"'Make a decision' — key collocation. You make, reach, or come to a decision. Never 'do'."},
+  {text:"Despite the rain, they <b>___</b> on with their picnic.",opts:["A carried","B went","C kept","D moved"],ans:"A",exp:"'Carry on (with)' = continue. 'Keep on' works but 'carried on with their picnic' is the natural phrase."},
+  {text:"The new law will <b>___</b> effect from January.",opts:["A take","B make","C come","D go"],ans:"A",exp:"'Take effect' = start to operate. Fixed collocation — you cannot 'make' or 'come' effect."},
+  {text:"I really <b>___</b> forward to seeing you next week.",opts:["A look","B am looking","C have looked","D looked"],ans:"B",exp:"Present continuous for fixed future arrangement. 'Look forward to' + gerund."},
+  {text:"He <b>___</b> his best but unfortunately failed the exam.",opts:["A made","B tried","C did","D gave"],ans:"C",exp:"'Do your best' — fixed collocation. 'Did his best' is the only natural form here."},
+];
+const B2_CLOZE=[
+  {text:"I have been living here <b>___</b> three years.",ans:["for"],exp:"'For' + period of time (three years). Compare 'since' + a point in time (2020)."},
+  {text:"She is not <b>___</b> tall as her sister.",ans:["as"],exp:"'Not as...as' — negative equality comparison. 'Not as tall as her sister.'"},
+  {text:"<b>___</b> you mind opening the window, please?",ans:["would","do"],exp:"'Would/Do you mind + -ing' — polite request formula."},
+  {text:"He works hard <b>___</b> order to earn enough money.",ans:["in"],exp:"'In order to' = so as to. Fixed prepositional phrase expressing purpose."},
+  {text:"We arrived late <b>___</b> to the traffic jam.",ans:["due"],exp:"'Due to' = because of. Followed by a noun/noun phrase, not a clause."},
+  {text:"The museum is open every day <b>___</b> Monday.",ans:["except"],exp:"'Except Monday' = apart from Monday. Common time exception pattern."},
+];
+const B2_WF=[
+  {text:"The instructions were not very <b>___</b>. (CLEAR)",ans:["unclear","clear"],exp:"CLEAR → unclear (negative prefix un-). 'Not very unclear' = double negative, so 'clear' also possible but 'unclear' fits better."},
+  {text:"She showed great <b>___</b> when she heard the news. (HAPPY)",ans:["happiness"],exp:"HAPPY → happiness. Abstract noun with suffix -ness."},
+  {text:"He gave a very <b>___</b> speech at the wedding. (EMOTION)",ans:["emotional"],exp:"EMOTION → emotional. Adjective form with suffix -al."},
+  {text:"The programme has been <b>___</b> successful. (REMARK)",ans:["remarkably"],exp:"REMARK → remarkably. Adverb form: remark + able + ly."},
+  {text:"There has been a significant <b>___</b> in house prices. (REDUCE)",ans:["reduction"],exp:"REDUCE → reduction. Noun form with suffix -tion. 'A reduction in' = fixed collocation."},
+  {text:"She is a very <b>___</b> person — she never forgets a birthday. (THOUGHT)",ans:["thoughtful"],exp:"THOUGHT → thoughtful. Adjective with suffix -ful meaning 'considerate'."},
+];
+const B2_KWT=[
+  {text:"I started learning French two years ago.<br><em>Key word: BEEN</em><br>I <b>_______________</b> French for two years.",ans:["have been learning"],exp:"Present perfect continuous: 'have been learning'. Duration from past to now uses 'for'."},
+  {text:"It was too cold to go swimming.<br><em>Key word: ENOUGH</em><br>It was not <b>_______________</b> go swimming.",ans:["warm enough to"],exp:"'Not warm enough to' = opposite of 'too cold to'. Adjective + enough + infinitive."},
+  {text:"'Did you take my pen?' she asked him.<br><em>Key word: WHETHER</em><br>She asked him <b>_______________</b> her pen.",ans:["whether he had taken"],exp:"Reported question: 'whether + subject + past perfect'. Tense shifts back."},
+  {text:"Going for a walk every morning is her habit.<br><em>Key word: USED</em><br>She <b>_______________</b> for a walk every morning.",ans:["is used to going"],exp:"'Be used to + gerund' = accustomed to. Different from 'used to + infinitive' (past habit)."},
+  {text:"The match was cancelled because it rained heavily.<br><em>Key word: DUE</em><br>The match was cancelled <b>_______________</b> rain.",ans:["due to heavy","due to the heavy"],exp:"'Due to' = because of. Followed by a noun: 'due to heavy rain'."},
+];
+const B2_READING=[
+  {passage:"Many people find it difficult to say no when asked to help. They worry that refusing will upset others or damage relationships. However, learning to decline requests politely is an important life skill. Saying yes to everything can lead to stress, overwork and resentment. A simple 'I'm afraid I can't manage that right now' is usually enough to decline without causing offence.",q:"What is the writer's main point?",opts:["A Refusing requests will always damage relationships.","B It is important to learn how to decline politely.","C People should never say yes to requests for help.","D Saying no is rude and should be avoided."],ans:"B",exp:"The passage argues that 'learning to decline requests politely is an important life skill' — B captures this directly. A is the opposite of what's said; C and D distort the argument."},
+];
+const C1_MCC=[
+  {text:"In cities around the world, a wide <b>___</b> of schemes is being instigated to promote environmental awareness.",opts:["A band","B range","C scale","D scope"],ans:"B",exp:"'A wide range of' — key C1 collocation. 'Scale' and 'scope' don't collocate with 'wide' in this structure."},
+  {text:"It's just as easy to <b>___</b> of litter properly as it is to drop it on the streets.",opts:["A dispose","B discard","C dump","D dispense"],ans:"A",exp:"'Dispose of' = get rid of responsibly. Requires preposition 'of'. The others don't take 'of' this way."},
+  {text:"Ink <b>___</b> up to 60% of the cost of a printed page.",opts:["A represents","B measures","C equals","D indicates"],ans:"A",exp:"'Represents' = accounts for/constitutes. Used when something makes up a percentage of a total."},
+  {text:"The typeface that a document uses also <b>___</b> how much information is retained.",opts:["A guides","B rules","C dominates","D influences"],ans:"D",exp:"'Influences' = has an indirect effect on. The others imply direct control, which doesn't fit."},
+  {text:"Geological <b>___</b> of salt were formed millions of years ago.",opts:["A provisions","B utilities","C materials","D deposits"],ans:"D",exp:"'Deposits' = naturally occurring mineral accumulations. Key geology/science collocation."},
+  {text:"The committee <b>___</b> a decision after three hours of debate.",opts:["A did","B reached","C made","D came"],ans:"B",exp:"'Reach a decision' after deliberation. Both B and C are possible but 'reached' implies effort over time."},
+  {text:"She was completely <b>___</b> off guard by the question.",opts:["A thrown","B taken","C caught","D put"],ans:"A",exp:"'Thrown off guard' = surprised/unprepared. Fixed C1 collocation."},
+  {text:"The new regulations <b>___</b> rise to considerable confusion among traders.",opts:["A gave","B brought","C led","D made"],ans:"A",exp:"'Give rise to' = cause/produce. Fixed collocation. 'Gave rise to confusion'."},
+];
+const C1_CLOZE=[
+  {text:"Something appears to <b>___</b> happened to the emotional content of books published in the UK.",ans:["have"],exp:"'Appears to have happened' — present perfect infinitive. After 'appear to', use 'have + past participle'."},
+  {text:"The frequency <b>___</b> which 'mood words' were used was analysed across 5 million books.",ans:["with"],exp:"'The frequency with which' — relative clause structure. 'With which' = how frequently."},
+  {text:"Exercise researchers discovered that British people walk <b>___</b> average 120km less per year.",ans:["on"],exp:"'On average' — fixed adverbial phrase. Cannot use 'in' or 'by' here."},
+  {text:"Most people find change unsettling and difficult to adapt <b>___</b>.",ans:["to"],exp:"'Adapt to' — fixed phrasal verb. You always adapt TO something."},
+  {text:"I'm about to have my first paddle-boarding lesson, <b>___</b> is a bit like canoeing.",ans:["which"],exp:"Non-defining relative clause with 'which' referring to the whole activity."},
+  {text:"<b>___</b> the simplicity of these ideas, they help prepare people mentally for major change.",ans:["despite","notwithstanding"],exp:"'Despite' + noun phrase = contrast/concession. Cannot be followed by a clause."},
+  {text:"The frequency <b>___</b> which mood words were used changed significantly after the 1960s.",ans:["with"],exp:"'The frequency with which' — fixed relative clause. Same structure as 'the speed with which'."},
+  {text:"It was <b>___</b> until the 1990s that research conclusively proved early exposure has lasting effects.",ans:["not"],exp:"'Not until' — negative inversion structure meaning 'only at that point'. Classic C1 cloze answer."},
+];
+const C1_WF=[
+  {text:"An element of exaggeration has led to certain <b>___</b> regarding the spider's evil nature. (CONCEPT)",ans:["misconceptions"],exp:"CONCEPT → misconceptions. Prefix mis- (wrong) + noun + plural. 'Misconceptions about X'."},
+  {text:"The female is <b>___</b> by nature, and has been known to kill the male after mating. (SOLITUDE)",ans:["solitary"],exp:"SOLITUDE → solitary. Adjective form. 'Solitary' = preferring to live or be alone."},
+  {text:"Such <b>___</b> are rare, but they explain how the spider got its name. (OCCUR)",ans:["occurrences"],exp:"OCCUR → occurrences. Noun + plural. 'Such occurrences' = such events/instances."},
+  {text:"The <b>___</b> effects of this spider's bite should not be underestimated. (PLEASE)",ans:["unpleasant"],exp:"PLEASE → unpleasant. Negative adjective: un- + pleasant. Don't write 'displeasant'."},
+  {text:"Maths lessons are remembered as hours of <b>___</b>, rather than enjoyment. (ENDURE)",ans:["endurance"],exp:"ENDURE → endurance. Abstract noun. 'Hours of endurance' = sustained painful effort."},
+  {text:"This memory is <b>___</b> what colours their attitude to maths in adulthood. (DOUBT)",ans:["undoubtedly"],exp:"DOUBT → undoubtedly. Adverb: un- + doubt + ed + ly. Modifies an entire clause."},
+  {text:"Some architects have been accused of being <b>___</b> of the impact on pedestrians. (DISMISS)",ans:["dismissive"],exp:"DISMISS → dismissive. Adjective. 'Dismissive of' = treating something as unimportant."},
+  {text:"Wind speed increases in <b>___</b> to height — tall buildings force winds groundwards. (RELATE)",ans:["relation"],exp:"RELATE → relation. 'In relation to' = proportional to / in connection with."},
+  {text:"Fashion owes more to science than some <b>___</b> might like to admit. (ENTHUSE)",ans:["enthusiasts"],exp:"ENTHUSE → enthusiasts. Noun + plural. People who are enthusiastic about something."},
+  {text:"The blog aims to make maths more <b>___</b> to those who missed out at school. (ACCESS)",ans:["accessible"],exp:"ACCESS → accessible. Adjective with suffix -ible. 'Accessible to' = easy to reach/understand."},
+];
+const C1_KWT=[
+  {text:"This novel stands a very good chance of winning the book prize.<br><em>Key word: HIGHLY</em><br>It is <b>_______________</b> win the book prize.",ans:["highly likely to","highly likely that it will"],exp:"'Highly likely to' = strong probability. HIGHLY must appear unchanged. From Test 4, Q25."},
+  {text:"'You really must stay and have dinner with us!' Laura said to us.<br><em>Key word: STAYING</em><br>Laura <b>_______________</b> for dinner.",ans:["insisted on us staying","insisted on our staying"],exp:"'Insist on + gerund'. STAYING must appear. 'Insisted on us/our staying' — both forms acceptable."},
+  {text:"If you need me, call me any time, night or day.<br><em>Key word: MATTER</em><br>Call me if you need me, <b>_______________</b> be.",ans:["no matter what time it may","no matter what time it might"],exp:"'No matter what time' = regardless of when. MATTER must be used unchanged."},
+  {text:"I don't want to be disturbed at all this morning!<br><em>Key word: ACCOUNT</em><br>On <b>_______________</b> disturbed this morning!",ans:["no account am i to be","no account should i be"],exp:"'On no account' = under no circumstances. Formal negative inversion. From Test 4, Q28."},
+  {text:"Since starting her new job, Charlotte has completely forgotten about her old plans.<br><em>Key word: SIGHT</em><br>Since starting her new job, Charlotte has completely <b>_______________</b> the plans she used to have.",ans:["lost sight of"],exp:"'Lose sight of' = forget about completely. SIGHT must appear in the phrase."},
+  {text:"David apologised for being unable to come to the meeting.<br><em>Key word: COULD</em><br>David said he <b>_______________</b> come to the meeting.",ans:["was sorry that he could not","was sorry he could not","was sorry he couldn't"],exp:"Reported speech: 'said he was sorry (that) he could not'. COULD must appear."},
+  {text:"The impression his boss has of Jack is that he's an ambitious person.<br><em>Key word: ACROSS</em><br>Jack <b>_______________</b> an ambitious person to his boss.",ans:["comes across as"],exp:"'Come across as' = give the impression of being. ACROSS must appear."},
+  {text:"It's none of your business what I choose to do in my free time.<br><em>Key word: NOTHING</em><br>What I choose to do in my free time <b>_______________</b> with you.",ans:["has nothing to do"],exp:"'Have nothing to do with' = not concern someone. NOTHING must be used."},
+  {text:"If Mark hadn't told Bella about that letter, we wouldn't have argued.<br><em>Key word: FOR</em><br>Had <b>_______________</b> telling Bella about that letter, we wouldn't have argued.",ans:["it not been for mark","it not been for mark's"],exp:"'Had it not been for' = third conditional inversion. FOR must be used."},
+  {text:"As soon as the company advertised the job, applications flooded in.<br><em>Key word: HAD</em><br>No <b>_______________</b> advertised, than the applications came flooding in.",ans:["sooner had the company","sooner had the vacancy been","sooner had the job been"],exp:"'No sooner had...than' = as soon as. Past perfect inversion. HAD must appear."},
+];
+const C1_READING=[
+  {passage:"Many people will have heard of the Alexander technique but have only a vague idea what it is about. Until earlier this year, I didn't have the faintest idea about it. But, hunched over a computer screen one day, I noticed that the neck and backache I regularly suffered were more painful than usual. I eventually allowed myself to be dragged along by a friend to talk to an osteopath.",q:"What does the writer suggest in the first paragraph?",opts:["A She had been reluctant to seek treatment for back problems.","B She was initially sceptical about the Alexander technique.","C She had little faith in the osteopath's methods.","D She was wrong to follow her friend's advice."],ans:"B",exp:"She 'saw no reason' to try it and was 'dragged along' — showing initial scepticism. B is correct."},
+  {passage:"The founder of a multinational corporation announced that his company would no longer keep track of employees' paid holiday. The Internet company and the multinational are fundamentally distinct — the former has 2,000 employees, while the latter has 50,000.",q:"The writer compares the two companies to demonstrate that:",opts:["A unlimited leave works better in large companies.","B employees in smaller companies are more loyal.","C what works in one context may not suit another.","D the policy was originally the Internet company's idea."],ans:"C",exp:"The contrast in size implies the policy suits 2,000 but may not work for 50,000 employees."},
+  {passage:"The key is learning to break the bad habits accumulated over years. Try folding your arms the opposite way to normal — it feels odd, doesn't it? This is an example of a habit the body has formed which can be hard to break. Many of us carry our heads too far back and tilted skywards.",q:"What does the writer say about bad habits in this paragraph?",opts:["A They are a consequence of actions we perform.","B They inevitably cause physical pain.","C They develop in early childhood.","D They can be difficult to change."],ans:"D",exp:"'Can be hard to break' directly states habits are difficult to change — option D."},
+];
+
+const VOCAB=[
+  {w:"scrutinise",cat:"academic",type:"verb",def:"to examine something carefully and critically",ex:"The committee will scrutinise the financial records before deciding.",col:"scrutinise carefully / closely",de:"genau untersuchen / prüfen"},
+  {w:"alleviate",cat:"academic",type:"verb",def:"to make something less severe or serious",ex:"Measures were taken to alleviate poverty in the region.",col:"alleviate suffering / pain / concerns",de:"lindern / mildern"},
+  {w:"contentious",cat:"academic",type:"adjective",def:"causing or likely to cause disagreement",ex:"Capital punishment remains a highly contentious issue.",col:"contentious issue / topic / debate",de:"umstritten / strittig"},
+  {w:"detrimental",cat:"academic",type:"adjective",def:"causing harm or damage",ex:"Excessive screen time can be detrimental to sleep.",col:"detrimental effect / impact on",de:"schädlich / nachteilig"},
+  {w:"unprecedented",cat:"exam",type:"adjective",def:"never having happened or existed before",ex:"The pandemic caused unprecedented disruption to global travel.",col:"unprecedented level / scale of",de:"beispiellos"},
+  {w:"misconception",cat:"exam",type:"noun",def:"a wrong belief about something",ex:"There are many misconceptions about the black widow spider.",col:"common / widespread misconception",de:"Missverständnis"},
+  {w:"ingrained",cat:"exam",type:"adjective",def:"deeply fixed in thought or behaviour",ex:"Once a habit is ingrained, people do it automatically.",col:"deeply / firmly ingrained",de:"tief verwurzelt"},
+  {w:"instigate",cat:"exam",type:"verb",def:"to cause something to begin",ex:"New schemes were instigated to promote environmental awareness.",col:"instigate a campaign / process / change",de:"veranlassen / einleiten"},
+  {w:"come to light",cat:"collocations",type:"phrase",def:"to become known or revealed",ex:"New evidence came to light during the investigation.",col:"evidence / information comes to light",de:"ans Licht kommen"},
+  {w:"raise awareness",cat:"collocations",type:"phrase",def:"to make people more conscious of an issue",ex:"The campaign aims to raise awareness about climate change.",col:"raise awareness of / about",de:"Bewusstsein schaffen"},
+  {w:"make headway",cat:"collocations",type:"phrase",def:"to make progress, especially when slow",ex:"The team is finally making headway with the project.",col:"make headway with / on",de:"Fortschritte machen"},
+  {w:"give rise to",cat:"collocations",type:"phrase",def:"to cause or produce something",ex:"The new policy gave rise to widespread criticism.",col:"give rise to problems / debate",de:"verursachen / führen zu"},
+  {w:"bear in mind",cat:"collocations",type:"phrase",def:"to remember and consider something",ex:"Bear in mind that the deadline is Friday.",col:"bear in mind that / bear this in mind",de:"bedenken / im Hinterkopf behalten"},
+  {w:"draw on",cat:"phrasal",type:"phrasal verb",def:"to use information, experience, or resources",ex:"Her novel draws on her own childhood memories.",col:"draw on experience / knowledge / resources",de:"zurückgreifen auf"},
+  {w:"set out",cat:"phrasal",type:"phrasal verb",def:"to explain systematically; to begin a journey",ex:"The report sets out the key findings clearly.",col:"set out to do / set out the details",de:"darlegen / aufzeigen"},
+  {w:"account for",cat:"phrasal",type:"phrasal verb",def:"to explain; or constitute a proportion",ex:"Ink accounts for 60% of printing costs.",col:"account for + noun / percentage",de:"erklären / ausmachen"},
+  {w:"bring about",cat:"phrasal",type:"phrasal verb",def:"to cause something to happen",ex:"The reform brought about significant changes.",col:"bring about change / improvements",de:"herbeiführen / bewirken"},
+  {w:"come across as",cat:"phrasal",type:"phrasal verb",def:"to give a particular impression",ex:"Jack comes across as very ambitious to his boss.",col:"come across as + adjective",de:"wirken als"},
+  {w:"put forward",cat:"phrasal",type:"phrasal verb",def:"to suggest or propose an idea",ex:"She put forward a compelling argument for change.",col:"put forward a proposal / suggestion",de:"vorschlagen / vorbringen"},
+  {w:"solitary",cat:"exam",type:"adjective",def:"preferring to be alone; done alone",ex:"The black widow spider is solitary by nature.",col:"solitary creature / lifestyle / figure",de:"einsam / einzelgängerisch"},
+  {w:"dismissive",cat:"exam",type:"adjective",def:"showing something is not worth attention",ex:"Some architects have been dismissive of the pedestrian impact.",col:"dismissive of / dismissive attitude",de:"abweisend / geringschätzig"},
+  {w:"far-reaching",cat:"academic",type:"adjective",def:"having wide and important effects",ex:"The legislation had far-reaching consequences for the economy.",col:"far-reaching consequences / implications / effects",de:"weitreichend"},
+  {w:"in the wake of",cat:"collocations",type:"phrase",def:"as a result of or following an event",ex:"Protests erupted in the wake of the controversial verdict.",col:"in the wake of + noun",de:"im Zuge von"},
+  {w:"reluctant",cat:"academic",type:"adjective",def:"unwilling to do something",ex:"She was reluctant to try the Alexander technique at first.",col:"reluctant to do / reluctant about",de:"zögerlich / widerwillig"},
+  {w:"accessible",cat:"academic",type:"adjective",def:"easy to understand or reach; available to all",ex:"The blog aims to make maths accessible to everyone.",col:"accessible to / make accessible",de:"zugänglich / verständlich"},
+  // EVERYDAY WORDS
+  {w:"stumble across",cat:"everyday",type:"phrasal verb",def:"to find or discover something by chance",ex:"I stumbled across an old photo album in the attic.",col:"stumble across / upon something",de:"zufällig entdecken"},
+  {w:"keep track of",cat:"everyday",type:"phrase",def:"to stay informed about something; to monitor",ex:"It's hard to keep track of all the new vocabulary.",col:"keep track of / lose track of",de:"den Überblick behalten"},
+  {w:"put up with",cat:"everyday",type:"phrasal verb",def:"to tolerate something unpleasant",ex:"I can't put up with this noise any longer.",col:"put up with someone/something",de:"ertragen / tolerieren"},
+  {w:"figure out",cat:"everyday",type:"phrasal verb",def:"to understand or solve something after thinking",ex:"I finally figured out how to use the new app.",col:"figure out how to / figure something out",de:"herausfinden / verstehen"},
+  {w:"come up with",cat:"everyday",type:"phrasal verb",def:"to think of an idea or a plan",ex:"She came up with a brilliant solution to the problem.",col:"come up with an idea / solution / plan",de:"sich ausdenken"},
+  {w:"run out of",cat:"everyday",type:"phrasal verb",def:"to use all of something so none is left",ex:"We ran out of milk, so I went to the shop.",col:"run out of time / money / ideas",de:"aufbrauchen / ausgehen von"},
+  {w:"look into",cat:"everyday",type:"phrasal verb",def:"to investigate or examine something",ex:"The police are looking into the incident.",col:"look into a matter / problem",de:"untersuchen / prüfen"},
+  {w:"get the hang of",cat:"everyday",type:"phrase",def:"to learn how to do something well",ex:"Once you get the hang of it, surfing is easy.",col:"get the hang of something / doing something",de:"den Dreh rauskriegen"},
+  {w:"under the weather",cat:"everyday",type:"phrase",def:"feeling slightly ill or unwell",ex:"I'm feeling a bit under the weather today.",col:"feeling under the weather",de:"sich unwohl fühlen"},
+  {w:"break the ice",cat:"everyday",type:"phrase",def:"to say or do something to make people feel more relaxed",ex:"He told a joke to break the ice at the party.",col:"break the ice with someone",de:"das Eis brechen"},
+  {w:"hit the nail on the head",cat:"everyday",type:"phrase",def:"to describe exactly what is causing a problem",ex:"You've hit the nail on the head — that's exactly the issue.",col:"hit the nail on the head"},
+  {w:"once in a while",cat:"everyday",type:"phrase",def:"occasionally, not very often",ex:"Once in a while, it's good to treat yourself.",col:"once in a while / every once in a while",de:"ab und zu"},
+  {w:"on the verge of",cat:"everyday",type:"phrase",def:"about to do something or very close to it",ex:"She was on the verge of tears when she got the news.",col:"on the verge of + noun/gerund",de:"kurz davor sein"},
+  {w:"take for granted",cat:"everyday",type:"phrase",def:"to fail to appreciate something because it is always there",ex:"We often take clean water for granted.",col:"take something/someone for granted",de:"als selbstverständlich betrachten"},
+  {w:"catch up",cat:"everyday",type:"phrasal verb",def:"to reach the same level as others; to learn recent news",ex:"I need to catch up on the work I missed.",col:"catch up with / catch up on",de:"aufholen / nachholen"},
+  {w:"go through",cat:"everyday",type:"phrasal verb",def:"to experience something difficult; to examine carefully",ex:"She went through a lot last year.",col:"go through a difficult time / go through documents",de:"durchmachen / erleiden"},
+  {w:"no wonder",cat:"everyday",type:"phrase",def:"it is not surprising that",ex:"No wonder you're tired — you've been working all day.",col:"no wonder + clause",de:"kein Wunder"},
+  {w:"be worth",cat:"everyday",type:"phrase",def:"to deserve time, money or effort",ex:"The film is definitely worth watching.",col:"be worth + gerund / be worth it",de:"wert sein / sich lohnen"},
+  {w:"as far as",cat:"everyday",type:"phrase",def:"to the degree or extent that",ex:"As far as I know, the meeting is still on.",col:"as far as I know / as far as possible",de:"soweit / was ... betrifft"},
+  {w:"in the long run",cat:"everyday",type:"phrase",def:"over a long period of time; eventually",ex:"Eating well pays off in the long run.",col:"in the long run / in the short run",de:"auf lange Sicht"},
+];
+
+// ═══════════════════════════════════════════
+// 16-LEVEL PATH STRUCTURE
+// ═══════════════════════════════════════════
+function mkLevels(){
+  const pos=['c','r','c','l','c','r','l','c','r','l'];
+  return [
+    // ── B2 (4 levels) ──────────────────────
+    {id:"b2a",name:"B2 — Level 1",sub:"First Steps",desc:"Start here. B2 vocabulary and grammar. Get familiar with all exercise types at a comfortable pace.",badge:"lb-b2a",icon:"🌱",nodes:[
+      {id:"b2a1",l:"Vocab Intro",i:"📚",t:"vocab-drill",xp:5},
+      {id:"b2a2",l:"MCC Basics",i:"🎯",t:"mcc",xp:8,qs:B2_MCC.slice(0,3)},
+      {id:"b2a3",l:"Open Cloze",i:"📝",t:"cloze",xp:8,qs:B2_CLOZE.slice(0,3)},
+      {id:"b2a4",l:"Word Form",i:"🔤",t:"wf",xp:8,qs:B2_WF.slice(0,3)},
+      {id:"b2a5",l:"KWT Intro",i:"⚙️",t:"kwt",xp:10,qs:B2_KWT.slice(0,2)},
+      {id:"b2a6",l:"Reading I",i:"📖",t:"reading",xp:12,qs:B2_READING},
+      {id:"b2a7",l:"Mixed",i:"🔀",t:"mixed",xp:12,qs:[...B2_MCC.slice(0,2),...B2_CLOZE.slice(0,2),...B2_WF.slice(0,1)]},
+      {id:"b2a8",l:"Checkpoint",i:"⭐",t:"checkpoint",xp:20,exam:true},
+    ]},
+    {id:"b2b",name:"B2 — Level 2",sub:"Building Confidence",desc:"More B2 exercises, slightly longer and more varied. All skills rotated every session.",badge:"lb-b2b",icon:"🌿",nodes:[
+      {id:"b2b1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"b2b2",l:"MCC II",i:"🎯",t:"mcc",xp:8,qs:B2_MCC.slice(2,6)},
+      {id:"b2b3",l:"Cloze II",i:"📝",t:"cloze",xp:8,qs:B2_CLOZE.slice(2,6)},
+      {id:"b2b4",l:"Word Form II",i:"🔤",t:"wf",xp:8,qs:B2_WF.slice(2,6)},
+      {id:"b2b5",l:"KWT II",i:"⚙️",t:"kwt",xp:10,qs:B2_KWT.slice(2,5)},
+      {id:"b2b6",l:"Mixed II",i:"🔀",t:"mixed",xp:12,qs:[...B2_MCC.slice(3,5),...B2_KWT.slice(1,2),...B2_WF.slice(3,5)]},
+      {id:"b2b7",l:"AI Practice",i:"✨",t:"ai-mixed",xp:15},
+      {id:"b2b8",l:"Level 2 Exam",i:"🏆",t:"checkpoint",xp:25,exam:true},
+    ]},
+    // ── B2+ (2 levels) ──────────────────────
+    {id:"b2pc",name:"B2+ — Level 3",sub:"Approaching C1",desc:"B2+ level — real C1 question types begin. Longer texts, more complex grammar.",badge:"lb-b2pc",icon:"🎯",nodes:[
+      {id:"b2pc1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"b2pc2",l:"MCC C1",i:"🎯",t:"mcc",xp:10,qs:C1_MCC.slice(0,3)},
+      {id:"b2pc3",l:"Cloze C1",i:"📝",t:"cloze",xp:10,qs:C1_CLOZE.slice(0,3)},
+      {id:"b2pc4",l:"Word Form",i:"🔤",t:"wf",xp:10,qs:C1_WF.slice(0,3)},
+      {id:"b2pc5",l:"KWT C1",i:"⚙️",t:"kwt",xp:12,qs:C1_KWT.slice(0,3)},
+      {id:"b2pc6",l:"Reading",i:"📖",t:"reading",xp:14,qs:C1_READING.slice(0,2)},
+      {id:"b2pc7",l:"Mixed",i:"🔀",t:"mixed",xp:14,qs:[...C1_MCC.slice(0,2),...C1_CLOZE.slice(0,2),...C1_WF.slice(0,1)]},
+      {id:"b2pc8",l:"Checkpoint",i:"⭐",t:"checkpoint",xp:28,exam:true},
+    ]},
+    {id:"b2pd",name:"B2+ — Level 4",sub:"C1 Foundations",desc:"Final B2+ level. Full C1 question difficulty, all parts of Paper 1.",badge:"lb-b2pd",icon:"📈",nodes:[
+      {id:"b2pd1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"b2pd2",l:"MCC",i:"🎯",t:"mcc",xp:10,qs:C1_MCC.slice(3,6)},
+      {id:"b2pd3",l:"Cloze",i:"📝",t:"cloze",xp:10,qs:C1_CLOZE.slice(3,6)},
+      {id:"b2pd4",l:"Word Form",i:"🔤",t:"wf",xp:10,qs:C1_WF.slice(3,6)},
+      {id:"b2pd5",l:"KWT",i:"⚙️",t:"kwt",xp:12,qs:C1_KWT.slice(3,6)},
+      {id:"b2pd6",l:"Reading",i:"📖",t:"reading",xp:14,qs:C1_READING},
+      {id:"b2pd7",l:"AI Mixed",i:"✨",t:"ai-mixed",xp:16},
+      {id:"b2pd8",l:"Level 4 Exam",i:"🏆",t:"checkpoint",xp:32,exam:true},
+    ]},
+    // ── C1 (10 levels) ──────────────────────
+    {id:"c1a",name:"C1 — Level 5",sub:"Core Grammar",desc:"C1 begins. Full exam difficulty on all UoE parts. Every session mixes all 4 types.",badge:"lb-c1a",icon:"🔵",nodes:[
+      {id:"c1a1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"c1a2",l:"MCC",i:"🎯",t:"mcc",xp:12,qs:C1_MCC.slice(4,8)},
+      {id:"c1a3",l:"Cloze",i:"📝",t:"cloze",xp:12,qs:C1_CLOZE.slice(4,8)},
+      {id:"c1a4",l:"Word Form",i:"🔤",t:"wf",xp:12,qs:C1_WF.slice(5,8)},
+      {id:"c1a5",l:"KWT",i:"⚙️",t:"kwt",xp:14,qs:C1_KWT.slice(4,7)},
+      {id:"c1a6",l:"Mixed",i:"🔀",t:"mixed",xp:14,qs:[...C1_MCC.slice(2,4),...C1_CLOZE.slice(2,4),...C1_KWT.slice(2,3)]},
+      {id:"c1a7",l:"Reading",i:"📖",t:"reading",xp:16,qs:C1_READING},
+      {id:"c1a8",l:"Checkpoint",i:"⭐",t:"checkpoint",xp:32,exam:true},
+    ]},
+    {id:"c1b",name:"C1 — Level 6",sub:"Collocations & Phrasal Verbs",desc:"Focus on vocabulary in context. Collocations, phrasal verbs, fixed expressions at C1 level.",badge:"lb-c1b",icon:"🔵",nodes:[
+      {id:"c1b1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"c1b2",l:"AI MCC",i:"✨",t:"ai-mcc",xp:14},
+      {id:"c1b3",l:"AI Cloze",i:"✨",t:"ai-cloze",xp:14},
+      {id:"c1b4",l:"Word Form",i:"🔤",t:"wf",xp:12,qs:C1_WF.slice(7,10)},
+      {id:"c1b5",l:"KWT",i:"⚙️",t:"kwt",xp:14,qs:C1_KWT.slice(6,9)},
+      {id:"c1b6",l:"Mixed",i:"🔀",t:"mixed",xp:14,qs:[...C1_MCC.slice(4,6),...C1_CLOZE.slice(4,6),...C1_WF.slice(2,3)]},
+      {id:"c1b7",l:"Reading",i:"📖",t:"reading",xp:16,qs:C1_READING},
+      {id:"c1b8",l:"Level 6 Exam",i:"🏆",t:"checkpoint",xp:36,exam:true},
+    ]},
+    {id:"c1c",name:"C1 — Level 7",sub:"Complex Sentences",desc:"Advanced grammar: inversions, conditionals, passive structures and KWT patterns.",badge:"lb-c1c",icon:"🔵",nodes:[
+      {id:"c1c1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"c1c2",l:"AI KWT",i:"✨",t:"ai-kwt",xp:16},
+      {id:"c1c3",l:"AI Cloze",i:"✨",t:"ai-cloze",xp:14},
+      {id:"c1c4",l:"AI Word Form",i:"✨",t:"ai-wf",xp:14},
+      {id:"c1c5",l:"KWT Hard",i:"⚙️",t:"kwt",xp:16,qs:C1_KWT.slice(7,10)},
+      {id:"c1c6",l:"Mixed",i:"🔀",t:"mixed",xp:16,qs:[...C1_MCC.slice(5,7),...C1_KWT.slice(5,7),...C1_CLOZE.slice(5,7)]},
+      {id:"c1c7",l:"Reading",i:"📖",t:"reading",xp:16,qs:C1_READING},
+      {id:"c1c8",l:"Checkpoint",i:"⭐",t:"checkpoint",xp:38,exam:true},
+    ]},
+    {id:"c1d",name:"C1 — Level 8",sub:"Accuracy Drill",desc:"Accuracy is everything at C1. Short, fast drills focusing on typical exam errors.",badge:"lb-c1d",icon:"🟣",nodes:[
+      {id:"c1d1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"c1d2",l:"AI MCC",i:"✨",t:"ai-mcc",xp:14},
+      {id:"c1d3",l:"AI Cloze",i:"✨",t:"ai-cloze",xp:14},
+      {id:"c1d4",l:"AI KWT",i:"✨",t:"ai-kwt",xp:16},
+      {id:"c1d5",l:"AI Word Form",i:"✨",t:"ai-wf",xp:14},
+      {id:"c1d6",l:"Full Mixed",i:"🔀",t:"ai-mixed",xp:18},
+      {id:"c1d7",l:"Reading",i:"📖",t:"reading",xp:16,qs:C1_READING},
+      {id:"c1d8",l:"Level 8 Exam",i:"🏆",t:"checkpoint",xp:40,exam:true},
+    ]},
+    {id:"c1e",name:"C1 — Level 9",sub:"Reading Depth",desc:"Extended reading passages. Multiple choice, gapped text and cross-text matching.",badge:"lb-c1e",icon:"🟣",nodes:[
+      {id:"c1e1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"c1e2",l:"AI MCC",i:"✨",t:"ai-mcc",xp:14},
+      {id:"c1e3",l:"Reading MC",i:"📖",t:"reading",xp:16,qs:C1_READING},
+      {id:"c1e4",l:"AI KWT",i:"✨",t:"ai-kwt",xp:16},
+      {id:"c1e5",l:"AI Cloze",i:"✨",t:"ai-cloze",xp:14},
+      {id:"c1e6",l:"AI Reading",i:"✨",t:"ai-reading",xp:18},
+      {id:"c1e7",l:"Full Mixed",i:"🔀",t:"ai-mixed",xp:18},
+      {id:"c1e8",l:"Checkpoint",i:"⭐",t:"checkpoint",xp:42,exam:true},
+    ]},
+    {id:"c1f",name:"C1 — Level 10",sub:"Weak Area Focus",desc:"The app targets your personal weak areas. Questions generated from your error patterns.",badge:"lb-c1f",icon:"🟣",nodes:[
+      {id:"c1f1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"c1f2",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:16},
+      {id:"c1f3",l:"AI Mixed",i:"✨",t:"ai-mixed",xp:18},
+      {id:"c1f4",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:16},
+      {id:"c1f5",l:"AI KWT",i:"✨",t:"ai-kwt",xp:16},
+      {id:"c1f6",l:"AI Mixed",i:"✨",t:"ai-mixed",xp:18},
+      {id:"c1f7",l:"Full Mixed",i:"🔀",t:"ai-mixed",xp:18},
+      {id:"c1f8",l:"Level 10 Exam",i:"🏆",t:"checkpoint",xp:45,exam:true},
+    ]},
+    {id:"c1g",name:"C1 — Level 11",sub:"Advanced Integration",desc:"All skills at full C1 difficulty. AI questions every session. Pre-exam polish.",badge:"lb-c1g",icon:"🟣",nodes:[
+      {id:"c1g1",l:"Vocab",i:"📚",t:"vocab-drill",xp:5},
+      {id:"c1g2",l:"AI Mixed",i:"✨",t:"ai-mixed",xp:18},
+      {id:"c1g3",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:16},
+      {id:"c1g4",l:"AI Mixed",i:"✨",t:"ai-mixed",xp:18},
+      {id:"c1g5",l:"AI KWT",i:"✨",t:"ai-kwt",xp:16},
+      {id:"c1g6",l:"Reading",i:"📖",t:"reading",xp:16,qs:C1_READING},
+      {id:"c1g7",l:"Full Mixed",i:"🔀",t:"ai-mixed",xp:20},
+      {id:"c1g8",l:"C1 Final Exam",i:"🏆",t:"checkpoint",xp:50,exam:true},
+    ]},
+    // ── EXAM LEVELS (5) ──────────────────────
+    {id:"ex1",name:"Exam — Level 12",sub:"Exam Simulation I",desc:"First exam simulation level. Mixed AI mocks timed like the real Paper 1.",badge:"lb-ex1",icon:"📋",nodes:[
+      {id:"ex1a1",l:"AI Mock",i:"✨",t:"ai-mixed",xp:20},
+      {id:"ex1a2",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:18},
+      {id:"ex1a3",l:"AI Mock",i:"✨",t:"ai-mixed",xp:20},
+      {id:"ex1a4",l:"AI KWT",i:"✨",t:"ai-kwt",xp:18},
+      {id:"ex1a5",l:"AI Mock",i:"✨",t:"ai-mixed",xp:20},
+      {id:"ex1a6",l:"Reading",i:"📖",t:"reading",xp:18,qs:C1_READING},
+      {id:"ex1a7",l:"Full Mock",i:"🔀",t:"ai-mixed",xp:22},
+      {id:"ex1a8",l:"Exam 12",i:"🏅",t:"checkpoint",xp:55,exam:true},
+    ]},
+    {id:"ex2",name:"Exam — Level 13",sub:"Exam Simulation II",desc:"Higher difficulty AI mocks. Focus on the question types you find hardest.",badge:"lb-ex2",icon:"📋",nodes:[
+      {id:"ex2a1",l:"AI Mock",i:"✨",t:"ai-mixed",xp:20},
+      {id:"ex2a2",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:18},
+      {id:"ex2a3",l:"AI Mock",i:"✨",t:"ai-mixed",xp:20},
+      {id:"ex2a4",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:18},
+      {id:"ex2a5",l:"AI Mock",i:"✨",t:"ai-mixed",xp:20},
+      {id:"ex2a6",l:"AI Reading",i:"✨",t:"ai-reading",xp:20},
+      {id:"ex2a7",l:"Full Mock",i:"🔀",t:"ai-mixed",xp:22},
+      {id:"ex2a8",l:"Exam 13",i:"🏅",t:"checkpoint",xp:60,exam:true},
+    ]},
+    {id:"ex3",name:"Exam — Level 14",sub:"Exam Simulation III",desc:"Near-exam difficulty. Every question AI-generated fresh. No mercy.",badge:"lb-ex3",icon:"🎖️",nodes:[
+      {id:"ex3a1",l:"AI Mock",i:"✨",t:"ai-mixed",xp:22},
+      {id:"ex3a2",l:"AI Mock",i:"✨",t:"ai-mixed",xp:22},
+      {id:"ex3a3",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:20},
+      {id:"ex3a4",l:"AI Mock",i:"✨",t:"ai-mixed",xp:22},
+      {id:"ex3a5",l:"AI KWT",i:"✨",t:"ai-kwt",xp:20},
+      {id:"ex3a6",l:"AI Mock",i:"✨",t:"ai-mixed",xp:22},
+      {id:"ex3a7",l:"Full Mock",i:"🔀",t:"ai-mixed",xp:24},
+      {id:"ex3a8",l:"Exam 14",i:"🏅",t:"checkpoint",xp:65,exam:true},
+    ]},
+    {id:"ex4",name:"Exam — Level 15",sub:"Final Polish",desc:"Last preparation. Target Grade A. Every question at peak C1+ difficulty.",badge:"lb-ex4",icon:"🎖️",nodes:[
+      {id:"ex4a1",l:"AI Mock",i:"✨",t:"ai-mixed",xp:22},
+      {id:"ex4a2",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:20},
+      {id:"ex4a3",l:"AI Mock",i:"✨",t:"ai-mixed",xp:22},
+      {id:"ex4a4",l:"AI Mock",i:"✨",t:"ai-mixed",xp:22},
+      {id:"ex4a5",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:20},
+      {id:"ex4a6",l:"AI Mock",i:"✨",t:"ai-mixed",xp:22},
+      {id:"ex4a7",l:"Full Mock",i:"🔀",t:"ai-mixed",xp:24},
+      {id:"ex4a8",l:"Exam 15",i:"🏅",t:"checkpoint",xp:70,exam:true},
+    ]},
+    {id:"ex5",name:"Exam — Level 16",sub:"Exam Ready — Never Ends",desc:"You have reached the top. AI generates infinite fresh questions. Keep your edge sharp.",badge:"lb-ex5",icon:"🌟",nodes:[
+      {id:"ex5a1",l:"AI Mock",i:"✨",t:"ai-mixed",xp:25},
+      {id:"ex5a2",l:"AI Mock",i:"✨",t:"ai-mixed",xp:25},
+      {id:"ex5a3",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:22},
+      {id:"ex5a4",l:"AI Mock",i:"✨",t:"ai-mixed",xp:25},
+      {id:"ex5a5",l:"AI Mock",i:"✨",t:"ai-mixed",xp:25},
+      {id:"ex5a6",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:22},
+      {id:"ex5a7",l:"AI Mock",i:"✨",t:"ai-mixed",xp:25},
+      {id:"ex5a8",l:"Final Exam",i:"🌟",t:"checkpoint",xp:100,exam:true},
+      // After final — loops
+      {id:"ex5b1",l:"AI Mock",i:"✨",t:"ai-mixed",xp:25},
+      {id:"ex5b2",l:"AI Mock",i:"✨",t:"ai-mixed",xp:25},
+      {id:"ex5b3",l:"Weak Areas",i:"🎯",t:"weak-focus",xp:22},
+      {id:"ex5b4",l:"Grand Final",i:"🌟",t:"checkpoint",xp:100,exam:true},
+    ]},
+  ];
+}
+const LEVELS=mkLevels();
+const ALL_NODES=LEVELS.flatMap(l=>l.nodes);
+
+// STATE
+let S={streak:0,lastStudy:null,studyDates:[],totalEx:0,xp:0,scores:{mcc:[],cloze:[],wf:[],kwt:[],reading:[],writing:[]},nodeProgress:{},starredV:[],encounteredV:[],diagDone:false};
+function save(){try{localStorage.setItem('cae4',JSON.stringify(S))}catch(e){}}
+function load(){try{const d=localStorage.getItem('cae4');if(d)S=Object.assign({streak:0,lastStudy:null,studyDates:[],totalEx:0,xp:0,scores:{mcc:[],cloze:[],wf:[],kwt:[],reading:[],writing:[]},nodeProgress:{},starredV:[],encounteredV:[],diagDone:false},JSON.parse(d))}catch(e){}}
+
+// STREAK
+function touchStreak(){
+  const t=new Date().toDateString();
+  if(!S.studyDates.includes(t)){S.studyDates.push(t);const y=new Date(Date.now()-86400000).toDateString();if(S.lastStudy===y)S.streak=(S.streak||0)+1;else if(S.lastStudy!==t)S.streak=1;S.lastStudy=t;save();}
+}
+function renderStreak(){
+  document.getElementById('s-num').textContent=S.streak||0;
+  document.getElementById('s-xp').textContent=S.xp||0;
+  const days=['M','T','W','T','F','S','S'],today=new Date(),dow=today.getDay();
+  const mon=new Date(today);mon.setDate(today.getDate()-(dow===0?6:dow-1));
+  const wrap=document.getElementById('wdots');wrap.innerHTML='';
+  for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);const ds=d.toDateString();const el=document.createElement('div');el.textContent=days[i];el.className='wd '+(ds===today.toDateString()?'wd-today':S.studyDates.includes(ds)?'wd-done':d<today?'wd-miss':'wd-future');wrap.appendChild(el);}
+}
+
+// TABS
+function goTab(t){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+t)?.classList.add('active');
+  document.getElementById('nav-'+t)?.classList.add('active');
+  if(t==='path'){buildPath();renderStreak();}
+  if(t==='vocab')renderVocab();
+  if(t==='stats')renderStats();
+}
+
+// PATH
+const POS=['c','r','c','l','c','r','l','c','r','l','c','l'];
+function getState(id,gi){
+  if(S.nodeProgress[id])return 'done';
+  const first=ALL_NODES.findIndex(n=>!S.nodeProgress[n.id]);
+  if(gi===first)return 'today';if(gi<first)return 'free';return 'locked';
+}
+function buildPath(){
+  const wrap=document.getElementById('path-wrap');wrap.innerHTML='';let gi=0;
+  LEVELS.forEach(lv=>{
+    const lh=document.createElement('div');lh.className='level-head';
+    lh.innerHTML=`<span class="lvl-badge ${lv.badge}">${lv.icon} ${lv.name} — ${lv.sub}</span><div class="level-line"></div>`;wrap.appendChild(lh);
+    const ld=document.createElement('div');ld.className='level-desc';ld.textContent=lv.desc;wrap.appendChild(ld);
+    const col=document.createElement('div');col.className='path-col';
+    lv.nodes.forEach((nd,ni)=>{
+      const pos=POS[ni%POS.length],st=getState(nd.id,gi);
+      if(ni>0){const c=document.createElement('div');c.className='pconn'+(st!=='locked'?' done':'');col.appendChild(c);}
+      const row=document.createElement('div');row.className=`path-row ${pos}`;
+      const el=document.createElement('div');
+      el.className=`pnode ${st==='today'?'nd-today':st==='done'?'nd-done':st==='free'?'nd-free':'nd-locked'}${nd.exam?' nd-exam':''}`;
+      el.innerHTML=`<span class="nd-icon">${nd.i}</span><span class="nd-lbl">${nd.l}</span>`;
+      if(S.nodeProgress[nd.id]){const x=document.createElement('span');x.className='nd-xp';x.textContent='+'+nd.xp;el.appendChild(x);}
+      if(st!=='locked')el.onclick=()=>startSess(nd,gi);
+      row.appendChild(el);col.appendChild(row);gi++;
+    });
+    wrap.appendChild(col);const sp=document.createElement('div');sp.style.height='30px';wrap.appendChild(sp);
+  });
+}
+
+// SESSION
+const INSTRS={mcc:"Read the text and decide which answer (A, B, C or D) best fits each gap. Only one answer is correct.",cloze:"Think of the word which best fits each gap. Use only ONE word. There is one correct answer.",wf:"Use the word given in CAPITALS to form a word that fits the gap in the same line.",kwt:"Complete the second sentence so it has a similar meaning. Use the KEY WORD. Do NOT change it. Use 3–6 words.",reading:"Read the text and choose the answer (A, B, C or D) which best fits according to the text.",mixed:"Mixed exercise — the question type varies. Read each task instruction carefully.","checkpoint":"Mixed skills checkpoint. Counts towards your level progress.","ai-mcc":"AI-generated multiple choice cloze (Part 1). Choose the best answer A–D.","ai-cloze":"AI-generated open cloze (Part 2). Think of ONE word per gap.","ai-kwt":"AI-generated key word transformation (Part 4). Use 3–6 words, key word unchanged.","ai-wf":"AI-generated word formation (Part 3). Change the word in CAPITALS to fit.","ai-mixed":"AI-generated mixed practice — all 4 question types may appear.","ai-reading":"AI-generated reading comprehension. Choose A, B, C or D.","weak-focus":"Targeting your weak areas — questions based on your error patterns.","vocab-drill":"Quick vocabulary drill — tap the correct definition."};
+const CHIPS={mcc:"Part 1 — Multiple Choice Cloze",cloze:"Part 2 — Open Cloze",wf:"Part 3 — Word Formation",kwt:"Part 4 — Key Word Transformation",reading:"Part 5 — Reading MC",mixed:"Mixed UoE",checkpoint:"Checkpoint Exam","ai-mcc":"AI — Part 1 MCC","ai-cloze":"AI — Part 2 Cloze","ai-kwt":"AI — Part 4 KWT","ai-wf":"AI — Part 3 Word Formation","ai-mixed":"AI — Mixed Practice","ai-reading":"AI — Reading","weak-focus":"Targeted Practice","vocab-drill":"Vocabulary Drill"};
+
+let sess={nd:null,qs:[],idx:0,correct:0,total:0,sel:null};
+
+async function startSess(nd,gi){
+  touchStreak();renderStreak();
+  sess={nd,qs:[],idx:0,correct:0,total:0,sel:null};
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-session').classList.add('active');
+  document.getElementById('sess-active').style.display='block';
+  document.getElementById('sess-done').style.display='none';
+  const t=nd.t;
+  if(t==='vocab-drill'){startVD(nd);return;}
+  if(t.startsWith('ai-')||t==='weak-focus'){await loadAI(nd);return;}
+  if(t==='checkpoint'){
+    var cpool=[].concat(C1_MCC,C1_CLOZE,C1_WF.slice(0,8),C1_KWT.slice(0,8),C1_READING);
+    sess.qs=cpool.sort(function(){return Math.random()-.5;}).slice(0,15);
+  } else {
+    var allMCC=[].concat(B2_MCC,C1_MCC);var allCLOZE=[].concat(B2_CLOZE,C1_CLOZE);var allWF=[].concat(B2_WF,C1_WF);var allKWT=[].concat(B2_KWT,C1_KWT);
+    var bank=t==='mcc'?allMCC:t==='cloze'?allCLOZE:t==='wf'?allWF:t==='kwt'?allKWT:t==='reading'?C1_READING:[].concat(allMCC.slice(0,5),allCLOZE.slice(0,5),allWF.slice(0,5),allKWT.slice(0,4));
+    var sbank=bank.slice().sort(function(){return Math.random()-.5;});
+    sess.qs=sbank.slice(0,Math.max(10,Math.min(20,sbank.length)));
+  }
+  if(!sess.qs.length){await loadAI(nd);return;}
+  renderQ();
+}
+
+async function loadAI(nd){
+  document.getElementById('q-text').innerHTML='<span class="dots">Loading AI questions</span>';
+  document.getElementById('q-input').innerHTML='';document.getElementById('btn-check').disabled=true;document.getElementById('btn-ai').style.display='none';
+  const weak=getWeak();const diff=nd.t==='weak-focus'?'C1 Advanced, focus on common error patterns':nd.id.startsWith('ex')?'C1+ exam level, very challenging':'C1 Advanced';
+  const focus=nd.t==='weak-focus'&&weak.length?`Focus heavily on these weak skills: ${weak.join(', ')}.`:'Mix all 4 parts (MCC, open cloze, word formation, KWT) equally.';
+  try{
+    const txt=await ai(`Generate 5 Cambridge C1 Advanced (CAE) Use of English questions at ${diff} level.\n${focus}\nJSON array only:\n[\n{"type":"mcc","text":"text with <b>___</b>","opts":["A ...","B ...","C ...","D ..."],"ans":"B","exp":"explanation"},\n{"type":"cloze","text":"text with <b>___</b>","ans":["word"],"exp":"explanation"},\n{"type":"wf","text":"text with <b>___</b> (WORD)","ans":["answer"],"exp":"explanation"},\n{"type":"kwt","text":"Sentence.<br><em>Key word: WORD</em><br><br>Second: <b>_______________</b> rest.","ans":["answer"],"exp":"explanation"}\n]\nMake all questions genuinely exam-quality. Mix types.`,'Return JSON array only.',1200);
+    sess.qs=JSON.parse(txt.replace(/```json|```/g,'').trim());
+  }catch(e){sess.qs=[...C1_MCC.slice(0,2),...C1_KWT.slice(0,2),...C1_WF.slice(0,1)];}
+  document.getElementById('btn-check').disabled=false;document.getElementById('btn-ai').style.display='flex';renderQ();
+}
+
+function getWeak(){return ['mcc','cloze','wf','kwt','reading'].filter(k=>{const s=S.scores[k]||[];return s.length>=3&&s.reduce((a,b)=>a+b,0)/s.length<0.6;});}
+
+function getQType(q){if(q.type)return q.type;if(q.passage)return 'reading';if(q.opts)return 'mcc';const a=Array.isArray(q.ans)?q.ans[0]:q.ans;return typeof a==='string'&&a.split(' ').length>1?'kwt':'cloze';}
+
+function renderQ(){
+  const q=sess.qs[sess.idx];if(!q)return;
+  const t=getQType(q),total=sess.qs.length;
+  document.getElementById('q-chip').textContent=CHIPS[t]||CHIPS[sess.nd.t]||'Exercise';
+  document.getElementById('q-instr').textContent=INSTRS[t]||INSTRS[sess.nd.t]||'';
+  document.getElementById('sess-lbl').textContent=sess.nd.l;
+  document.getElementById('sess-ctr').textContent=`${sess.idx+1}/${total}`;
+  document.getElementById('sess-pb').style.width=Math.round((sess.idx/total)*100)+'%';
+  const fb=document.getElementById('q-fb');fb.className='fb';fb.style.display='none';fb.removeAttribute('data-ai');
+  sess.sel=null;
+  if(q.passage){
+    document.getElementById('q-text').innerHTML=`<div class="passage-text">${q.passage}</div><div style="font-weight:600;font-size:14px;color:var(--text)">${q.q}</div>`;
+    const ia=document.getElementById('q-input');ia.innerHTML='';
+    const ml=document.createElement('div');ml.className='mc-list';
+    q.opts.forEach((o,i)=>{const d=document.createElement('div');d.className='mc-opt';d.innerHTML=`<span class="mc-letter">${['A','B','C','D'][i]}</span><span>${o.replace(/^[A-D]\s/,'')}</span>`;d.onclick=()=>{document.querySelectorAll('.mc-opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');sess.sel=i;};ml.appendChild(d);});
+    ia.appendChild(ml);
+  } else if(q.opts){
+    document.getElementById('q-text').innerHTML=q.text;
+    const ia=document.getElementById('q-input');ia.innerHTML='';
+    const ml=document.createElement('div');ml.className='mc-list';
+    q.opts.forEach((o,i)=>{const d=document.createElement('div');d.className='mc-opt';const ltr=o.match(/^([A-D])/)?o[0]:['A','B','C','D'][i];d.innerHTML=`<span class="mc-letter">${ltr}</span><span>${o.replace(/^[A-D]\s/,'')}</span>`;d.onclick=()=>{document.querySelectorAll('#q-input .mc-opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');sess.sel=i;};ml.appendChild(d);});
+    ia.appendChild(ml);
+  } else {
+    document.getElementById('q-text').innerHTML=q.text;
+    document.getElementById('q-input').innerHTML='<input class="ans-inp" id="q-ans" type="text" placeholder="Your answer..." autocomplete="off">';
+    setTimeout(()=>document.getElementById('q-ans')?.focus(),80);
+  }
+  document.getElementById('btn-check').style.display='flex';document.getElementById('btn-check').disabled=false;
+  document.getElementById('btn-next').style.display='none';document.getElementById('btn-ai').style.display='flex';
+}
+
+function checkQ(){
+  const q=sess.qs[sess.idx],fb=document.getElementById('q-fb');
+  if(q.opts){
+    if(sess.sel===null){alert('Select an answer.');return;}
+    const ci=q.passage?q.opts.findIndex((_,i)=>['A','B','C','D'][i]===q.ans):q.opts.findIndex(o=>o[0]===q.ans);
+    const ok=sess.sel===ci;score(ok,q.passage?'reading':'mcc');
+    document.querySelectorAll('#q-input .mc-opt').forEach((d,i)=>{if(i===ci)d.classList.add('ok');else if(i===sess.sel&&!ok)d.classList.add('err');});
+    showFB(fb,ok,null,q.exp);
+  } else {
+    const ua=(document.getElementById('q-ans')?.value||'').trim().toLowerCase();
+    if(!ua){alert('Type your answer.');return;}
+    const as=Array.isArray(q.ans)?q.ans:[q.ans];
+    const ok=as.some(a=>ua===a.toLowerCase()||ua.includes(a.toLowerCase())||a.toLowerCase().includes(ua));
+    const t=getQType(q);score(ok,t==='kwt'?'kwt':t==='cloze'?'cloze':'wf');
+    const inp=document.getElementById('q-ans');if(inp)inp.className='ans-inp '+(ok?'ok':'err');
+    showFB(fb,ok,ok?null:`Answer: ${as[0]}`,q.exp);
+  }
+}
+function addEncountered(word,type,def,ex){if(!S.encounteredV)S.encounteredV=[];if(!S.encounteredV.find(v=>v.w===word)){S.encounteredV.push({w:word,cat:'encountered',type:type||'word',def:def,ex:ex||'',col:''});if(S.encounteredV.length>200)S.encounteredV=S.encounteredV.slice(-200);save();}}
+function showFB(fb,ok,ans,exp){
+  fb.className='fb show '+(ok?'ok':'err');fb.style.display='block';
+  fb.innerHTML=`<span class="tag ${ok?'tag-g':'tag-r'}">${ok?'✓ Correct':'✗ Wrong'}</span>${ans?` <span class="tag tag-a">${ans}</span>`:''}<br><br><span style="font-size:12px;line-height:1.7;color:var(--text)">${exp||''}</span>`;
+  document.getElementById('btn-check').style.display='none';document.getElementById('btn-next').style.display='flex';document.getElementById('btn-ai').style.display='none';
+}
+function score(ok,type,q){sess.total++;if(ok)sess.correct++;S.totalEx=(S.totalEx||0)+1;if(!S.scores[type])S.scores[type]=[];S.scores[type].push(ok?1:0);save();}
+function nextQ(){sess.idx++;if(sess.idx>=sess.qs.length){finishSess();return;}renderQ();}
+
+async function getAIQ(){
+  const btn=document.getElementById('btn-ai');btn.textContent='Loading...';btn.disabled=true;
+  const t={mcc:'multiple choice cloze (Part 1)',cloze:'open cloze (Part 2)',wf:'word formation (Part 3)',kwt:'key word transformation (Part 4)'};
+  const type=t[sess.nd?.t]||'key word transformation';
+  try{
+    const txt=await ai(`Generate one authentic C1 Advanced CAE ${type} question. JSON only: {"type":"${sess.nd?.t||'kwt'}","text":"question html","ans":["answer"],"exp":"explanation"}`,'JSON only.',400);
+    const p=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    sess.qs.splice(sess.idx,0,p);renderQ();
+  }catch(e){alert('Could not load. Try again.');}
+  btn.textContent='✨ AI question instead';btn.disabled=false;
+}
+
+function finishSess(){
+  const pct=sess.total?Math.round((sess.correct/sess.total)*100):0;
+  document.getElementById('sess-active').style.display='none';document.getElementById('sess-done').style.display='block';
+  document.getElementById('done-icon').textContent=pct>=80?'🏆':pct>=60?'🎉':'💪';
+  document.getElementById('done-title').textContent=pct>=80?'Excellent!':pct>=60?'Well done!':'Keep going!';
+  document.getElementById('done-sub').textContent=`${sess.correct}/${sess.total} correct · ${pct}%`;
+  setTimeout(()=>document.getElementById('ring-arc').style.strokeDashoffset=251-(251*(pct/100)),100);
+  document.getElementById('ring-pct').textContent=pct+'%';
+  const xp=pct>=80?sess.nd.xp:pct>=60?Math.round(sess.nd.xp*.7):Math.round(sess.nd.xp*.4);
+  S.xp=(S.xp||0)+xp;if(pct>=40)S.nodeProgress[sess.nd.id]=true;save();
+  document.getElementById('result-detail').innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">${pct>=80?'Grade A territory!':pct>=60?'Solid. Review what you missed.':'Keep drilling — this improves fast.'}</div><div style="font-size:11px;color:var(--faint)">+${xp} XP · ${getTip()}</div>`;
+  showCel(pct);
+}
+function exitSess(){goTab('path');}function backToPath(){goTab('path');}
+function keepGoing(){const n=ALL_NODES.find(x=>!S.nodeProgress[x.id]);if(n)startSess(n,ALL_NODES.indexOf(n));else goTab('path');}
+
+// VOCAB DRILL AS SESSION NODE
+function startVD(nd){
+  document.getElementById('sess-active').style.display='block';
+  document.getElementById('sess-done').style.display='none';
+  document.getElementById('q-chip').textContent='Vocabulary Drill';
+  document.getElementById('q-instr').textContent='Tap the correct definition for each word.';
+  document.getElementById('sess-lbl').textContent='Vocab';
+  document.getElementById('btn-ai').style.display='none';
+  document.getElementById('btn-check').style.display='none';
+  document.getElementById('sess-ctr').textContent='Drill';
+  document.getElementById('sess-pb').style.width='50%';
+  renderVDQ();
+}
+function renderVDQ(){
+  const pool=VOCAB;
+  const v=pool[Math.floor(Math.random()*pool.length)];
+  const others=pool.filter(function(x){return x.w!==v.w;}).sort(function(){return Math.random()-.5;}).slice(0,3);
+  const opts=[v].concat(others).sort(function(){return Math.random()-.5;});
+  document.getElementById('q-text').innerHTML=
+    '<div style="font-family:var(--fd);font-size:24px;color:var(--blue);margin-bottom:3px">'+v.w+'</div>'
+    +'<div style="font-size:10px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.06em">'+v.type+'</div>';
+  const ia=document.getElementById('q-input');ia.innerHTML='';
+  const g=document.createElement('div');
+  g.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px';
+  opts.forEach(function(o){
+    const b=document.createElement('button');b.className='drill-opt';
+    b.textContent=o.def.length>45?o.def.slice(0,45)+'...':o.def;
+    b.onclick=function(){
+      const ok=o.w===v.w;
+      document.querySelectorAll('.drill-opt').forEach(function(x){x.onclick=null;});
+      b.classList.add(ok?'ok':'err');
+      if(!ok){
+        const cv=pool.find(function(x){return x.w===v.w;});
+        if(cv)document.querySelectorAll('.drill-opt').forEach(function(x){if(x.textContent.startsWith(cv.def.slice(0,15)))x.classList.add('ok');});
+      }
+      const fb=document.getElementById('q-fb');
+      fb.className='fb show '+(ok?'ok':'err');fb.style.display='block';
+      fb.innerHTML='<span class="tag '+(ok?'tag-g':'tag-r')+'">'+(ok?'✓':'✗')+'</span> <strong style="color:var(--text)">'+v.w+'</strong> — <em style="color:var(--muted)">'+v.ex+'</em>';
+      score(ok,'mcc');
+      document.getElementById('btn-next').style.display='flex';
+    };
+    g.appendChild(b);
+  });
+  ia.appendChild(g);
+  const fb=document.getElementById('q-fb');fb.className='fb';fb.style.display='none';
+  document.getElementById('btn-next').style.display='none';
+}
+
+// ═══════════════════════════════════════════
+// VOCAB — 5 MODES
+// ═══════════════════════════════════════════
+let vcat='all',vmode='cards';
+let vscore={correct:0,total:0};
+
+function getVList(){
+  const base=[...VOCAB,...(S.encounteredV||[])];
+  if(vcat==='all')return VOCAB;
+  if(vcat==='starred')return base.filter(function(v){return S.starredV&&S.starredV.includes(v.w);});
+  if(vcat==='encountered')return S.encounteredV||[];
+  return VOCAB.filter(function(v){return v.cat===vcat;});
+}
+
+var VMODES=[
+  {m:'cards',icon:'🃏',name:'Flashcards',desc:'Tap a card to reveal definition'},
+  {m:'write',icon:'✍️',name:'Write it',desc:'Type the word from memory'},
+  {m:'match',icon:'🔗',name:'Match',desc:'Connect 6 words to definitions'},
+  {m:'fill',icon:'📝',name:'Gap Fill',desc:'Fill the missing word in a sentence'},
+  {m:'drill',icon:'⚡',name:'Quick Drill',desc:'4-choice definition quiz'},
+  {m:'translate',icon:'🌍',name:'Translate',desc:'Switch between English and German'},
+];
+var VCATS=[
+  {c:'all',icon:'📚',name:'All words',desc:'Every word in the bank'},
+  {c:'everyday',icon:'💬',name:'Everyday English',desc:'Common phrases for daily use'},
+  {c:'exam',icon:'🎯',name:'Exam vocabulary',desc:'High-frequency CAE words'},
+  {c:'collocations',icon:'🔤',name:'Collocations',desc:'Fixed word combinations'},
+  {c:'phrasal',icon:'🔀',name:'Phrasal verbs',desc:'Draw on, set out, come across as...'},
+  {c:'academic',icon:'🎓',name:'Academic',desc:'Formal and academic vocabulary'},
+];
+var sheetType='';
+
+function openSheet(type){
+  sheetType=type;
+  var bg=document.getElementById('vsheet-bg');
+  var sheet=document.getElementById('vsheet');
+  var body=document.getElementById('vsheet-body');
+  var title=document.getElementById('vsheet-title');
+  if(!bg||!sheet)return;
+  bg.style.display='block';
+  sheet.style.display='block';
+  var items=type==='mode'?VMODES:VCATS;
+  var current=type==='mode'?vmode:vcat;
+  title.textContent=type==='mode'?'Learning mode':'Word category';
+  body.innerHTML='';
+  items.forEach(function(item){
+    var el=document.createElement('div');
+    var key=type==='mode'?item.m:item.c;
+    var isActive=current===key;
+    el.style.cssText='display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border);background:'+(isActive?'var(--blue-dim)':'transparent');
+    el.innerHTML='<span style="font-size:22px;width:30px;text-align:center">'+item.icon+'</span>'
+      +'<div style="flex:1"><div style="font-size:14px;font-weight:600;color:'+(isActive?'var(--blue)':'var(--text)')+'">'+item.name+'</div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-top:2px">'+item.desc+'</div></div>'
+      +(isActive?'<span style="color:var(--blue);font-size:16px">✓</span>':'');
+    el.onclick=function(){
+      if(type==='mode'){
+        vmode=item.m;vscore={correct:0,total:0};
+        document.getElementById('vmode-icon').textContent=item.icon;
+        document.getElementById('vmode-text').textContent=item.name;
+        document.getElementById('vmode-box').style.borderColor='var(--blue)';
+      } else {
+        pickCat(item.c,item.icon,item.name);
+      }
+      closeSheet();
+      renderVocab();
+    };
+    body.appendChild(el);
+  });
+}
+
+function closeSheet(){
+  var bg=document.getElementById('vsheet-bg');
+  var sheet=document.getElementById('vsheet');
+  if(bg)bg.style.display='none';
+  if(sheet)sheet.style.display='none';
+}
+
+function pickCat(c,icon,name){
+  vcat=c;vscore={correct:0,total:0};
+  document.getElementById('vcat-icon').textContent=icon;
+  document.getElementById('vcat-text').textContent=name;
+  document.getElementById('vcat-box').style.borderColor=c==='all'?'var(--border)':'var(--blue)';
+  ['chip-enc','chip-star'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.classList.remove('active');
+  });
+  if(c==='encountered'){var el=document.getElementById('chip-enc');if(el)el.classList.add('active');}
+  if(c==='starred'){var el=document.getElementById('chip-star');if(el)el.classList.add('active');}
+  closeSheet();
+  renderVocab();
+}
+
+
+function setVcat(c,btn){pickCat(c,'','');}
+function setVmode(m,btn){vmode=m;vscore={correct:0,total:0};renderVocab();}
+function escQ(s){return (s||'').replace(/'/g,"\x27");}
+
+function renderVocab(){
+  const list=getVList();
+  const wrap=document.getElementById('vocab-body');wrap.innerHTML='';
+  const sb=document.createElement('div');sb.className='vocab-score';
+  sb.innerHTML='<span style="color:var(--muted);font-size:11px">'+list.length+' words</span><span><span class="vocab-score-num">'+vscore.correct+'</span><span style="color:var(--faint)"> / '+vscore.total+' correct</span></span>';
+  wrap.appendChild(sb);
+  if(!list.length){wrap.innerHTML+='<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">No words here yet.</div>';return;}
+  if(vmode==='cards')renderVCards(list,wrap);
+  else if(vmode==='write')renderVWrite(list,wrap);
+  else if(vmode==='match')renderVMatch(list,wrap);
+  else if(vmode==='fill')renderVFill(list,wrap);
+  else if(vmode==='drill')renderVDrill(list,wrap);
+  else if(vmode==='translate')renderVTranslate(list,wrap);
+}
+
+function renderVCards(list,wrap){
+  list.forEach(function(v,i){
+    const card=document.createElement('div');
+    card.className='fc';
+    const starred=S.starredV&&S.starredV.includes(v.w);
+    // star
+    const starEl=document.createElement('div');
+    starEl.className='fc-star'+(starred?' on':'');
+    starEl.textContent='★';
+    starEl.onclick=function(e){e.stopPropagation();toggleStar(starEl,v.w);};
+    // word
+    const wordEl=document.createElement('div');wordEl.className='fc-word';wordEl.textContent=v.w;
+    const typeEl=document.createElement('div');typeEl.className='fc-type';typeEl.textContent=v.type;
+    // hidden content
+    const defEl=document.createElement('div');defEl.className='fc-def';defEl.id='vfd'+i;defEl.style.display='none';defEl.textContent=v.def;
+    const exEl=document.createElement('div');exEl.className='fc-ex';exEl.id='vfe'+i;exEl.style.display='none';exEl.textContent='"'+v.ex+'"';
+    const colEl=document.createElement('div');colEl.className='fc-col';colEl.id='vfc'+i;colEl.style.cssText='display:none;font-size:11px;color:var(--blue);margin-top:4px';colEl.textContent='📌 '+(v.col||'');
+    const hintEl=document.createElement('div');hintEl.className='fc-hint';hintEl.id='vfh'+i;hintEl.textContent='Tap to reveal';
+    [starEl,wordEl,typeEl,defEl,exEl,colEl,hintEl].forEach(function(el){card.appendChild(el);});
+    card.onclick=function(e){
+      if(e.target===starEl)return;
+      const sh=defEl.style.display==='block';
+      [defEl,exEl,colEl].forEach(function(el){el.style.display=sh?'none':'block';});
+      hintEl.style.display=sh?'block':'none';
+    };
+    wrap.appendChild(card);
+  });
+}
+function renderVWrite(list,wrap){
+  const v=list[Math.floor(Math.random()*list.length)];
+  const masked=v.ex.replace(v.w,'_______');
+  const card=document.createElement('div');card.className='write-card';
+  card.innerHTML='<div class="write-type">'+v.type+' &middot; '+v.cat+'</div>'
+    +'<div class="write-def">'+v.def+'</div>'
+    +'<div class="write-ex">"'+masked+'"</div>'
+    +(v.col?'<div style="font-size:11px;color:var(--blue);margin-bottom:10px">Hint: '+v.col+'</div>':'')
+    +'<input class="fill-inp" id="vw-inp" type="text" placeholder="Type the word..." autocomplete="off">'
+    +'<div class="fb" id="vw-fb" style="margin-top:10px"></div>';
+  wrap.appendChild(card);
+  const checkBtn=document.createElement('button');checkBtn.className='btn btn-blue';checkBtn.style.marginTop='10px';checkBtn.textContent='Check ✓';
+  const nextBtn=document.createElement('button');nextBtn.className='btn btn-ghost';nextBtn.style.marginTop='10px';nextBtn.textContent='Next word →';nextBtn.onclick=function(){renderVocab();};
+  checkBtn.onclick=function(){
+    const ua=((document.getElementById('vw-inp')||{value:''}).value||'').trim().toLowerCase();
+    const ok=ua===v.w.toLowerCase();
+    const inp=document.getElementById('vw-inp');if(inp)inp.className='fill-inp '+(ok?'ok':'err');
+    const fb=document.getElementById('vw-fb');fb.className='fb show '+(ok?'ok':'err');fb.style.display='block';
+    fb.innerHTML='<span class="tag '+(ok?'tag-g':'tag-r')+'">'+(ok?'✓ Correct':'✗ Wrong')+'</span>'
+      +(!ok?' <span class="tag tag-a">Answer: '+v.w+'</span>':'')
+      +'<br><br><em style="color:var(--muted);font-size:12px">"'+v.ex+'"</em>';
+    vscore.total++;if(ok)vscore.correct++;
+    if(!S.scores.mcc)S.scores.mcc=[];S.scores.mcc.push(ok?1:0);S.totalEx++;save();
+    checkBtn.style.display='none';wrap.appendChild(nextBtn);
+  };
+  wrap.appendChild(checkBtn);
+}
+
+let matchSel=null;
+function renderVMatch(list,wrap){
+  const pool=list.slice().sort(function(){return Math.random()-.5;}).slice(0,6);
+  const words=pool.slice().sort(function(){return Math.random()-.5;});
+  const defs=pool.slice().sort(function(){return Math.random()-.5;});
+  let matched=0;matchSel=null;
+  const scoreEl=document.createElement('div');scoreEl.className='match-score';scoreEl.id='match-score-el';
+  scoreEl.textContent='Tap a word, then tap its definition.';wrap.appendChild(scoreEl);
+  const area=document.createElement('div');area.className='match-area';
+  const wCol=document.createElement('div');wCol.className='match-col';
+  const dCol=document.createElement('div');dCol.className='match-col';
+  function onMatch(){
+    matched++;
+    const se=document.getElementById('match-score-el');
+    if(se)se.textContent=matched+'/'+pool.length+' matched';
+    if(matched===pool.length){
+      vscore.correct+=matched;vscore.total+=matched;save();
+      if(se)se.textContent='All matched! Great work.';
+      const nb=document.createElement('button');nb.className='btn btn-ghost';nb.style.cssText='margin:10px 0';nb.textContent='Play again →';nb.onclick=function(){renderVocab();};wrap.appendChild(nb);
+    }
+  }
+  words.forEach(function(v){
+    const el=document.createElement('div');el.className='match-item';el.textContent=v.w;el.dataset.key=v.w;el.dataset.side='word';
+    el.onclick=function(){handleVMatch(el,onMatch);};wCol.appendChild(el);
+  });
+  defs.forEach(function(v){
+    const el=document.createElement('div');el.className='match-item';el.style.fontSize='11px';el.style.lineHeight='1.4';
+    el.textContent=v.def.length>50?v.def.slice(0,50)+'...':v.def;el.dataset.key=v.w;el.dataset.side='def';
+    el.onclick=function(){handleVMatch(el,onMatch);};dCol.appendChild(el);
+  });
+  area.appendChild(wCol);area.appendChild(dCol);wrap.appendChild(area);
+}
+function handleVMatch(el,onMatch){
+  if(el.classList.contains('matched'))return;
+  if(!matchSel){matchSel=el;el.classList.add('selected');return;}
+  if(matchSel===el){matchSel=null;el.classList.remove('selected');return;}
+  const ok=matchSel.dataset.key===el.dataset.key;
+  if(ok){
+    [matchSel,el].forEach(function(x){x.classList.remove('selected');x.classList.add('matched');x.onclick=null;});
+    matchSel=null;onMatch();
+  } else {
+    [matchSel,el].forEach(function(x){x.classList.add('wrong');setTimeout(function(){x.classList.remove('wrong');},400);});
+    matchSel.classList.remove('selected');matchSel=null;vscore.total++;save();
+  }
+}
+
+function renderVFill(list,wrap){
+  const v=list[Math.floor(Math.random()*list.length)];
+  const re=new RegExp(v.w.replace(/[-[\]/{}()*+?.\^$|]/g,'\$&'),'i');
+  const blank='<span class="fill-blank">'+v.w.replace(/./g,'_')+'</span>';
+  const display=v.ex.replace(re,blank);
+  const card=document.createElement('div');card.className='fill-card';
+  card.innerHTML='<div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Fill in the gap</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-bottom:10px">'+v.def+' &middot; <em>'+v.type+'</em></div>'
+    +'<div class="fill-sentence">'+display+'</div>'
+    +(v.col?'<div style="font-size:11px;color:var(--faint);margin-top:6px;margin-bottom:10px">Collocation: '+v.col+'</div>':'')
+    +'<input class="fill-inp" id="vfill-inp" type="text" placeholder="Type the missing word(s)..." autocomplete="off">'
+    +'<div class="fb" id="vfill-fb" style="margin-top:10px"></div>';
+  const checkBtn=document.createElement('button');checkBtn.className='btn btn-blue';checkBtn.style.marginTop='10px';checkBtn.textContent='Check ✓';
+  const nextBtn=document.createElement('button');nextBtn.className='btn btn-ghost';nextBtn.style.marginTop='10px';nextBtn.textContent='Next →';nextBtn.onclick=function(){renderVocab();};
+  checkBtn.onclick=function(){
+    const ua=((document.getElementById('vfill-inp')||{value:''}).value||'').trim().toLowerCase();
+    const ok=ua===v.w.toLowerCase();
+    const inp=document.getElementById('vfill-inp');if(inp)inp.className='fill-inp '+(ok?'ok':'err');
+    const fb=document.getElementById('vfill-fb');fb.className='fb show '+(ok?'ok':'err');fb.style.display='block';
+    fb.innerHTML='<span class="tag '+(ok?'tag-g':'tag-r')+'">'+(ok?'✓ Correct':'✗ Wrong')+'</span>'
+      +(!ok?' <span class="tag tag-a">Answer: '+v.w+'</span>':'')
+      +'<br><br><span style="font-size:12px;color:var(--muted)">"'+v.ex+'"</span>';
+    vscore.total++;if(ok)vscore.correct++;
+    if(!S.scores.mcc)S.scores.mcc=[];S.scores.mcc.push(ok?1:0);S.totalEx++;save();
+    checkBtn.style.display='none';wrap.appendChild(nextBtn);
+  };
+  wrap.appendChild(card);wrap.appendChild(checkBtn);
+}
+
+function renderVDrill(list,wrap){
+  if(!list.length)return;
+  const v=list[Math.floor(Math.random()*list.length)];
+  const others=list.filter(function(x){return x.w!==v.w;}).sort(function(){return Math.random()-.5;}).slice(0,3);
+  const opts=[v].concat(others).sort(function(){return Math.random()-.5;});
+  const card=document.createElement('div');card.className='drill-card';  const g=document.createElement('div');g.className='drill-opts';
+  opts.forEach(function(o){
+    const b=document.createElement('button');b.className='drill-opt';
+    b.textContent=o.def.length>45?o.def.slice(0,45)+'...':o.def;
+    b.dataset.correct=v.w;b.dataset.chosen=o.w;
+    b.onclick=function(){chkDrillBtn(b);};
+    g.appendChild(b);
+  });
+  const optsHTML='';// replaced by DOM
+  const h1=document.createElement('div');h1.style.cssText='font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px';h1.textContent='What does this mean?';
+  const h2=document.createElement('div');h2.style.cssText='font-family:var(--fd);font-size:22px;color:var(--blue);margin-bottom:3px';h2.textContent=v.w;
+  const h3=document.createElement('div');h3.style.cssText='font-size:10px;color:var(--faint);text-transform:uppercase;font-weight:600;letter-spacing:.06em;margin-bottom:12px';h3.textContent=v.type;
+  const fbD=document.createElement('div');fbD.className='fb';fbD.id='vd-fb';fbD.style.marginTop='10px';
+  [h1,h2,h3,g,fbD].forEach(function(el){card.appendChild(el);});
+  const next=document.createElement('button');next.className='btn btn-ghost';next.style.marginTop='10px';next.textContent='Next word →';next.onclick=function(){renderVocab();};
+  wrap.appendChild(card);wrap.appendChild(next);
+}
+function chkDrillBtn(btn){chkDrill(btn,btn.dataset.correct,btn.dataset.chosen);}
+function chkDrill(btn,correct,chosen){
+  const ok=correct===chosen;
+  document.querySelectorAll('.drill-opt').forEach(function(b){b.onclick=null;});
+  btn.classList.add(ok?'ok':'err');
+  if(!ok){
+    const allV=[...VOCAB,...(S.encounteredV||[])];
+    const cv=allV.find(function(x){return x.w===correct;});
+    if(cv)document.querySelectorAll('.drill-opt').forEach(function(b){if(b.textContent.startsWith(cv.def.slice(0,15)))b.classList.add('ok');});
+  }
+  const fb=document.getElementById('vd-fb');fb.className='fb show '+(ok?'ok':'err');fb.style.display='block';
+  const allV=[...VOCAB,...(S.encounteredV||[])];
+  const v=allV.find(function(x){return x.w===correct;});
+  fb.innerHTML='<span class="tag '+(ok?'tag-g':'tag-r')+'">'+(ok?'✓':'✗')+'</span> <strong style="color:var(--text)">'+correct+'</strong> — <em style="color:var(--muted)">'+(v?v.ex:'')+'</em>';
+  vscore.total++;if(ok)vscore.correct++;
+  if(!S.scores.mcc)S.scores.mcc=[];S.scores.mcc.push(ok?1:0);S.totalEx++;save();
+}
+
+function toggleStar(el,w){
+  if(!S.starredV)S.starredV=[];
+  const i=S.starredV.indexOf(w);
+  if(i>-1)S.starredV.splice(i,1);else S.starredV.push(w);
+  if(el)el.classList.toggle('on',S.starredV.includes(w));
+  save();
+}
+
+async function loadMoreV(){
+  const wrap=document.getElementById('vocab-body');
+  const load=document.createElement('div');load.className='fc';
+  load.innerHTML='<div class="fc-word" style="font-size:16px;color:var(--muted)"><span class="dots">Loading</span></div>';
+  wrap.prepend(load);
+  const cats={all:'C1 collocations, phrasal verbs and academic vocabulary',exam:'exam-level C1 vocabulary',collocations:'C1 collocations',phrasal:'C1 phrasal verbs',academic:'C1 academic vocabulary',everyday:'common everyday English phrases and idioms',starred:'C1 advanced vocabulary',encountered:'C1 vocabulary'};
+  try{
+    const txt=await ai('Generate 6 English '+(cats[vcat]||'C1 vocabulary')+' items. JSON array: [{"word":"...","cat":"academic|exam|collocations|phrasal|everyday","type":"...","def":"short definition","ex":"full natural sentence","col":"key collocation"}]','JSON array only.',700);
+    const items=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    load.remove();
+    items.forEach(function(v){VOCAB.push({w:v.word,cat:v.cat||'academic',type:v.type,def:v.def,ex:v.ex,col:v.col||''});});
+    renderVocab();
+  }catch(e){load.remove();}
+}
+
+function addEncountered(word,type,def,ex){
+  if(!S.encounteredV)S.encounteredV=[];
+  if(!S.encounteredV.find(function(v){return v.w===word;})){
+    S.encounteredV.push({w:word,cat:'encountered',type:type||'word',def:def||'',ex:ex||'',col:''});
+    if(S.encounteredV.length>200)S.encounteredV=S.encounteredV.slice(-200);
+    save();
+  }
+}
+
+
+// ── TRANSLATE MODE ──────────────────────────────────────
+let translateDir='en2de'; // or 'de2en'
+
+function renderVTranslate(list,wrap){
+  // Direction toggle
+  const toggle=document.createElement('div');
+  toggle.style.cssText='display:flex;gap:8px;margin-bottom:14px;align-items:center';
+  const btn1=document.createElement('button');
+  btn1.className='chip'+(translateDir==='en2de'?' active':'');
+  btn1.id='t-en2de';btn1.style.cssText='flex:1;text-align:center;padding:8px';
+  btn1.textContent='🇩🇪 English → German';
+  btn1.onclick=function(){setTransDir('en2de');};
+  const btn2=document.createElement('button');
+  btn2.className='chip'+(translateDir==='de2en'?' active':'');
+  btn2.id='t-de2en';btn2.style.cssText='flex:1;text-align:center;padding:8px';
+  btn2.textContent='🇬🇧 German → English';
+  btn2.onclick=function(){setTransDir('de2en');};
+  toggle.appendChild(btn1);toggle.appendChild(btn2);
+  wrap.appendChild(toggle);
+
+  // Filter to words that have German translations
+  const allV=[...VOCAB,...(S.encounteredV||[])];
+  const transWords=list.filter(function(v){return v.de;});
+  if(!transWords.length){
+    const msg=document.createElement('div');
+    msg.style.cssText='text-align:center;color:var(--muted);padding:20px;font-size:13px';
+    msg.textContent='Loading translations for this category...';
+    wrap.appendChild(msg);
+    loadTranslationsForCat(list,wrap);
+    return;
+  }
+  renderTransCard(transWords,wrap);
+}
+
+function setTransDir(dir){
+  translateDir=dir;
+  document.querySelectorAll('#t-en2de,#t-de2en').forEach(function(b){
+    b.classList.toggle('active',b.id==='t-'+dir);
+  });
+  renderVocab();
+}
+
+function renderTransCard(words,wrap){
+  const v=words[Math.floor(Math.random()*words.length)];
+  const isEN2DE=translateDir==='en2de';
+  const question=isEN2DE?v.w:v.de;
+  const answer=isEN2DE?v.de:v.w;
+  const hint=isEN2DE?v.def:v.type;
+
+  const card=document.createElement('div');card.className='write-card';
+  const flagQ=isEN2DE?'🇬🇧':'🇩🇪';
+  const flagA=isEN2DE?'🇩🇪':'🇬🇧';
+  const lbl=document.createElement('div');lbl.style.cssText='font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px';lbl.textContent='Translate '+flagQ+' → '+flagA;
+  const qWord=document.createElement('div');qWord.style.cssText='font-family:var(--fd);font-size:26px;color:var(--text);margin-bottom:6px';qWord.textContent=question;
+  const hintDiv=document.createElement('div');hintDiv.style.cssText='font-size:12px;color:var(--muted);margin-bottom:14px;font-style:italic';hintDiv.textContent=hint;
+  const inp=document.createElement('input');inp.className='fill-inp';inp.id='trans-inp';inp.type='text';inp.placeholder='Translate...';inp.autocomplete='off';
+  const fbDiv=document.createElement('div');fbDiv.className='fb';fbDiv.id='trans-fb';fbDiv.style.marginTop='10px';
+  [lbl,qWord,hintDiv,inp,fbDiv].forEach(function(el){card.appendChild(el);});
+
+  const checkBtn=document.createElement('button');checkBtn.className='btn btn-blue';checkBtn.style.marginTop='10px';checkBtn.textContent='Check ✓';
+  const nextBtn=document.createElement('button');nextBtn.className='btn btn-ghost';nextBtn.style.marginTop='10px';nextBtn.textContent='Next →';nextBtn.onclick=function(){renderVocab();};
+  const skipBtn=document.createElement('button');skipBtn.className='btn btn-ghost';skipBtn.style.cssText='margin-top:8px;color:var(--faint)';skipBtn.textContent='Show answer';
+
+  checkBtn.onclick=function(){
+    const ua=((document.getElementById('trans-inp')||{value:''}).value||'').trim().toLowerCase();
+    if(!ua)return;
+    // Accept partial match — German translations often have multiple options
+    const answers=answer.toLowerCase().split(' / ');
+    const ok=answers.some(function(a){
+      return ua===a||a.includes(ua)&&ua.length>=3||ua.includes(a.slice(0,Math.max(4,a.length-3)));
+    });
+    const inp=document.getElementById('trans-inp');if(inp)inp.className='fill-inp '+(ok?'ok':'err');
+    const fb=document.getElementById('trans-fb');fb.className='fb show '+(ok?'ok':'err');fb.style.display='block';
+    const ok_tag=document.createElement('span');ok_tag.className='tag '+(ok?'tag-g':'tag-r');ok_tag.textContent=ok?'✓ Correct':'✗ Wrong';
+    fb.innerHTML='';fb.appendChild(ok_tag);
+    if(!ok){const ans_tag=document.createElement('span');ans_tag.className='tag tag-a';ans_tag.textContent='Answer: '+answer;fb.appendChild(ans_tag);}
+    const transl=document.createElement('span');transl.style.cssText='font-size:12px;color:var(--muted);display:block;margin-top:6px';transl.textContent=flagQ+' '+question+' = '+flagA+' '+answer;fb.appendChild(transl);
+    if(v.ex){const exEl=document.createElement('em');exEl.style.cssText='font-size:11px;color:var(--faint);display:block;margin-top:4px';exEl.textContent=v.ex;fb.appendChild(exEl);}
+    vscore.total++;if(ok)vscore.correct++;
+    if(!S.scores.mcc)S.scores.mcc=[];S.scores.mcc.push(ok?1:0);S.totalEx++;save();
+    checkBtn.style.display='none';skipBtn.style.display='none';
+    wrap.appendChild(nextBtn);
+  };
+
+  skipBtn.onclick=function(){
+    const fb=document.getElementById('trans-fb');fb.className='fb show info';fb.style.display='block';
+    fb.innerHTML='';const sk_tag=document.createElement('span');sk_tag.className='tag tag-b';sk_tag.textContent='Answer';fb.appendChild(sk_tag);const sk_txt=document.createElement('span');sk_txt.style.cssText='font-size:13px;color:var(--text);margin-left:6px';sk_txt.textContent=flagQ+' '+question+' = '+flagA+' '+answer;fb.appendChild(sk_txt);
+    skipBtn.style.display='none';checkBtn.style.display='none';
+    wrap.appendChild(nextBtn);
+  };
+
+  wrap.appendChild(card);
+  wrap.appendChild(checkBtn);
+  wrap.appendChild(skipBtn);
+}
+
+async function loadTranslationsForCat(list,wrap){
+  // Use AI to get German translations for words missing them
+  const missing=list.filter(function(v){return !v.de;}).slice(0,10);
+  if(!missing.length)return;
+  try{
+    const wordList=missing.map(function(v){return v.w;}).join(', ');
+    const txt=await ai('Translate these English words/phrases to German. Return JSON array: [{"word":"english","de":"deutsche Übersetzung"}]. Words: '+wordList,'JSON array only.',500);
+    const items=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    items.forEach(function(item){
+      const v=VOCAB.find(function(x){return x.w===item.word;});
+      if(v)v.de=item.de;
+      const ev=(S.encounteredV||[]).find(function(x){return x.w===item.word;});
+      if(ev)ev.de=item.de;
+    });
+    save();
+    // Re-render
+    wrap.innerHTML='';
+    const sb=document.createElement('div');sb.className='vocab-score';
+    sb.innerHTML='';const sc1=document.createElement('span');sc1.style.cssText='color:var(--muted);font-size:11px';sc1.textContent=list.length+' words';const sc2=document.createElement('span');sc2.innerHTML='<span class="vocab-score-num">'+vscore.correct+'</span><span style="color:var(--faint)"> / '+vscore.total+' correct</span>';sb.appendChild(sc1);sb.appendChild(sc2);
+    wrap.appendChild(sb);
+    renderVTranslate(list,wrap);
+  }catch(e){
+    const msg=wrap.querySelector('div');
+    if(msg)msg.textContent='Could not load translations. Try again.';
+  }
+}
+
+// WRITING
+function updateWC(){
+  const t=document.getElementById('w-text').value.trim();
+  const wc=t?t.split(/\s+/).length:0;
+  const el=document.getElementById('wc-n');
+  el.textContent=wc+' / 260';
+  el.className=wc>=220&&wc<=260?'wc-ok':wc>260?'wc-over':'wc-low';
+  const fill=document.getElementById('wc-bar-fill');
+  if(fill)fill.style.width=Math.min(100,Math.round((wc/260)*100))+'%';
+}
+
+async function getWPrompt(){
+  const g=document.getElementById('w-genre').value;
+  const tc=document.getElementById('w-task-card');
+  const tp=document.getElementById('w-task-prompt');
+  const tpts=document.getElementById('w-task-points');
+  const tb=document.getElementById('w-task-badge');
+  tc.style.display='block';
+  tp.innerHTML='<span class="dots">Generating task</span>';
+  tpts.innerHTML='';
+  if(tb)tb.textContent=g.charAt(0).toUpperCase()+g.slice(1).replace('-',' ');
+  try{
+    const raw=await ai('Write one authentic Cambridge C1 Advanced (CAE) writing task for a "'+g+'". Format as JSON: {"intro":"the situation/context sentence","points":["bullet point 1","bullet point 2","bullet point 3"],"instruction":"the write instruction with word count"}. No markdown.','Return JSON only.',500);
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    tp.innerHTML=parsed.intro+'<br><br><em style="color:var(--muted);font-size:12px">'+parsed.instruction+'</em>';
+    tpts.innerHTML=parsed.points.map(function(p){return '<div class="w-task-point">'+p+'</div>';}).join('');
+  }catch(e){
+    const fallback=await ai('One authentic CAE '+g+' writing task. Full exam instructions, 220-260 words. Just the task text.','',400).catch(function(){return 'Could not load task.';});
+    tp.innerHTML=fallback.split('\n').join('<br>');tpts.innerHTML='';
+  }
+}
+
+async function submitW(){
+  const text=document.getElementById('w-text').value.trim();
+  if(text.split(/\s+/).length<40){alert('Write at least a few sentences first.');return;}
+  const g=document.getElementById('w-genre').value;
+  const prompt=(document.getElementById('w-task-prompt')||{textContent:''}).textContent||'No task selected';
+  const wc=text.split(/\s+/).length;
+  const card=document.getElementById('w-fb-card');
+  const body=document.getElementById('w-fb-body');
+  const bandEl=document.getElementById('w-fb-band');
+  card.classList.add('show');card.style.display='block';card.style.display='block';
+  body.innerHTML='<div class="dots" style="color:var(--muted);padding:10px 0">Analysing your writing</div>';
+  try{
+    const prompt_text='You are a strict CAE examiner. Evaluate this '+g+' ('+wc+' words).\n\nTASK: '+prompt+'\n\nRESPONSE: '+text+'\n\nReturn JSON only: {"content":{"band":4,"comment":"one sentence"},"communicative":{"band":3,"comment":"one sentence"},"organisation":{"band":4,"comment":"one sentence"},"language":{"band":3,"comment":"one sentence"},"overall":4,"improvement":"one specific actionable improvement"}';
+    const raw=await ai(prompt_text,'Return JSON only. Be honest. Grade A = band 4-5.',700);
+    const fb=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    bandEl.textContent='Band '+fb.overall+'/5';
+    bandEl.className='w-fb-band band-'+fb.overall;
+    const crits=[
+      {icon:'📌',label:'Content',key:'content'},
+      {icon:'🗣️',label:'Comm. Achievement',key:'communicative'},
+      {icon:'🏗️',label:'Organisation',key:'organisation'},
+      {icon:'💬',label:'Language',key:'language'},
+    ];
+    body.innerHTML=crits.map(function(c){
+      const d=fb[c.key]||{band:3,comment:'No comment.'};
+      return '<div class="w-fb-crit">'
+        +'<span class="w-fb-band-dot band-'+d.band+'">'+d.band+'</span>'
+        +'<span class="w-fb-crit-icon">'+c.icon+'</span>'
+        +'<div class="w-fb-crit-content">'
+        +'<div class="w-fb-crit-label">'+c.label+'</div>'
+        +'<div class="w-fb-crit-text">'+d.comment+'</div>'
+        +'</div></div>';
+    }).join('')
+    +'<div class="w-fb-tip"><div class="w-fb-tip-label">💡 Key improvement</div>'+fb.improvement+'</div>';
+    document.getElementById('w-model-wrap').style.display='block';
+    S.scores.writing.push(1);S.totalEx++;save();
+  }catch(e){
+    body.innerHTML='<div style="color:var(--muted);font-size:13px;padding:10px">Could not get feedback. Try again.</div>';
+  }
+}
+
+async function getModelAns(){
+  const g=document.getElementById('w-genre').value;
+  const prompt=(document.getElementById('w-task-prompt')||{textContent:''}).textContent||'';
+  const fb=document.getElementById('w-model');
+  fb.className='fb ai show';fb.style.display='block';
+  fb.innerHTML='<span class="dots">Writing model answer</span>';
+  try{
+    const t=await ai('Write a band 5 CAE model '+g+' for:\n\n'+prompt+'\n\n230-250 words. C1 language throughout. List 3 language features used.','',700);
+    fb.innerHTML=t.split('\n').join('<br>');
+  }catch(e){fb.innerHTML='Could not load.';}
+}
+
+
+// STATS
+function renderStats(){renderStreak();document.getElementById('st-s').textContent=S.streak||0;document.getElementById('st-e').textContent=S.totalEx||0;document.getElementById('st-d').textContent=(S.studyDates||[]).length;const all=[...(S.scores.mcc||[]),...(S.scores.cloze||[]),...(S.scores.wf||[]),...(S.scores.kwt||[]),...(S.scores.reading||[])];const acc=all.length?Math.round(all.reduce((a,b)=>a+b,0)/all.length*100):null;document.getElementById('st-a').textContent=acc!==null?acc+'%':'—';
+const skills=[{n:'MCC (Part 1)',k:'mcc'},{n:'Open Cloze',k:'cloze'},{n:'Word Form',k:'wf'},{n:'KWT (Part 4)',k:'kwt'},{n:'Reading',k:'reading'},{n:'Writing',k:'writing'}];
+const bars=document.getElementById('skill-bars');bars.innerHTML='';skills.forEach(s=>{const sc=S.scores[s.k]||[];const pct=sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length*100):0;bars.innerHTML+=`<div class="skill-row"><span class="skill-name">${s.n}</span><div class="skill-bg"><div class="skill-fill" style="width:${pct}%"></div></div><span class="skill-pct">${sc.length?pct+'%':'—'}</span></div>`;});
+const weak=skills.filter(s=>{const sc=S.scores[s.k]||[];return sc.length>=3&&sc.reduce((a,b)=>a+b,0)/sc.length<0.6;});document.getElementById('weak-areas').innerHTML=weak.length?weak.map(s=>`<span class="tag tag-r">${s.n}</span>`).join('')+'<div style="font-size:12px;color:var(--muted);margin-top:6px">These appear more in Level 10+ Weak Area nodes.</div>':'<span style="color:var(--muted);font-size:13px">No weak areas yet — keep practising.</span>';}
+
+// DIAGNOSTIC
+const DIAG=[
+  {part:"Use of English — Part 1",chip:"Part 1 — MCC",instr:"Choose A, B, C or D that best fits the gap.",text:"Geological <b>___</b> of salt were formed millions of years ago.",opts:["A provisions","B utilities","C materials","D deposits"],ans:"D",exp:"'Deposits' = naturally occurring mineral accumulations. Classic science collocation."},
+  {part:"Use of English — Part 2",chip:"Part 2 — Open Cloze",instr:"Think of ONE word that best fits the gap.",text:"Something appears to <b>___</b> happened to the emotional content of books published in the UK.",ans:["have"],exp:"'Appears to have happened' — present perfect infinitive after 'appear to'."},
+  {part:"Use of English — Part 3",chip:"Part 3 — Word Formation",instr:"Use the word in CAPITALS to form a word that fits the gap.",text:"The results were <b>_______________</b>, suggesting the experiment had failed. (CONCLUDE)",ans:["inconclusive"],exp:"CONCLUDE → inconclusive. Negative adjective: in- + conclus + ive."},
+  {part:"Use of English — Part 4",chip:"Part 4 — KWT",instr:"Complete using the key word. 3–6 words. Do NOT change the key word.",text:"Since starting her new job, Charlotte has completely forgotten about her old plans.<br><em>Key word: SIGHT</em><br><br>Since starting her new job, Charlotte has completely <b>_______________</b> the plans she used to have.",ans:["lost sight of"],exp:"'Lose sight of' = forget about completely. Fixed phrasal verb."},
+  {part:"Reading — Part 5",chip:"Part 5 — Reading MC",instr:"Read the text and choose the best answer A, B, C or D.",passage:"The founder of a multinational corporation announced that his company would no longer keep track of employees' paid holiday. The Internet company and the multinational are fundamentally distinct — the former has 2,000 employees, while the latter has 50,000.",text:"The writer compares the two companies to demonstrate that:",opts:["A unlimited leave works better in large companies.","B employees in smaller companies are more loyal.","C what works in one context may not suit another.","D the policy was originally the Internet company's idea."],ans:"C",exp:"The contrast in size implies the policy suits a small company but may not work for 50,000 employees."},
+  {part:"Use of English — Part 1",chip:"Part 1 — MCC",instr:"Choose A, B, C or D that best fits the gap.",text:"The typeface that a document uses also <b>___</b> how much of the information is retained.",opts:["A guides","B rules","C dominates","D influences"],ans:"D",exp:"'Influences' = has an indirect effect on. The others imply direct control."},
+  {part:"Use of English — Part 3",chip:"Part 3 — Word Formation",instr:"Use the word in CAPITALS to form a word that fits the gap.",text:"Some architects have been accused of being <b>_______________</b> of the impact on pedestrians. (DISMISS)",ans:["dismissive"],exp:"DISMISS → dismissive. 'Dismissive of' = treating something as unimportant."},
+  {part:"Writing",chip:"Writing Task",instr:"Write 4–6 sentences for one body paragraph of this essay task.",text:"<div style='font-size:13px;color:#b8c4d8;line-height:1.7;border-left:3px solid var(--amber-mid);padding-left:10px'><strong style='color:var(--text)'>Essay: Is technology making young people less creative?</strong><br><br>Write one body paragraph: your view + one supporting point.</div>",ans:[],isWriting:true,exp:""},
+];
+let di=0,dc=0,dw='';
+function beginDiag(){di=0;dc=0;dw='';document.getElementById('diag-intro').style.display='none';document.getElementById('diag-result').style.display='none';document.getElementById('diag-sess').style.display='block';renderDQ();}
+function skipDiag(){S.diagDone=true;save();document.getElementById('bnav').style.display='flex';goTab('path');}
+function renderDQ(){
+  const q=DIAG[di];document.getElementById('dp-pb').style.width=Math.round((di/DIAG.length)*100)+'%';document.getElementById('dp-ctr').textContent=`${di+1}/${DIAG.length}`;
+  document.getElementById('dp-lbl').textContent=q.part;document.getElementById('dp-chip').textContent=q.chip;document.getElementById('dp-instr').textContent=q.instr;
+  document.getElementById('dp-q').innerHTML=q.passage?`<div class="passage-text">${q.passage}</div><div style="font-weight:600;color:var(--text)">${q.text}</div>`:q.text;
+  const ia=document.getElementById('dp-input');ia.innerHTML='';const fb=document.getElementById('dp-fb');fb.className='fb';fb.style.display='none';
+  if(q.isWriting){ia.innerHTML='<textarea class="ans-inp" id="d-ans" placeholder="Write your paragraph here..." style="min-height:120px;margin-top:10px"></textarea>';}
+  else if(q.opts){const ml=document.createElement('div');ml.className='mc-list';q.opts.forEach((o,i)=>{const d=document.createElement('div');d.className='mc-opt';d.innerHTML=`<span class="mc-letter">${o[0]}</span><span>${o.slice(2)}</span>`;d.onclick=()=>{document.querySelectorAll('#dp-input .mc-opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');};ml.appendChild(d);});ia.appendChild(ml);}
+  else{ia.innerHTML='<input class="ans-inp" id="d-ans" type="text" placeholder="Your answer..." autocomplete="off" style="margin-top:10px">';setTimeout(()=>document.getElementById('d-ans')?.focus(),80);}
+  document.getElementById('dp-check').style.display='flex';document.getElementById('dp-next').style.display='none';
+}
+function checkDiag(){
+  const q=DIAG[di],fb=document.getElementById('dp-fb');
+  if(q.isWriting){dw=document.getElementById('d-ans')?.value||'';fb.className='fb show info';fb.style.display='block';fb.innerHTML='<span class="tag tag-a">Noted</span> Writing evaluated in results.';document.getElementById('dp-check').style.display='none';document.getElementById('dp-next').style.display='flex';return;}
+  if(q.opts){const sel=document.querySelector('#dp-input .mc-opt.sel');if(!sel){alert('Select an answer.');return;}const ok=sel.querySelector('.mc-letter').textContent===q.ans;if(ok)dc++;document.querySelectorAll('#dp-input .mc-opt').forEach(d=>{if(d.querySelector('.mc-letter').textContent===q.ans)d.classList.add('ok');else if(d===sel&&!ok)d.classList.add('err');});fb.className='fb show '+(ok?'ok':'err');fb.style.display='block';fb.innerHTML=`<span class="tag ${ok?'tag-g':'tag-r'}">${ok?'✓':'✗'}</span><br><br><span style="font-size:12px;color:var(--text)">${q.exp}</span>`;}
+  else{const ua=(document.getElementById('d-ans')?.value||'').trim().toLowerCase();if(!ua){alert('Type your answer.');return;}const as=Array.isArray(q.ans)?q.ans:[q.ans];const ok=as.some(a=>ua===a.toLowerCase()||ua.includes(a.toLowerCase()));if(ok)dc++;const inp=document.getElementById('d-ans');if(inp)inp.className='ans-inp '+(ok?'ok':'err');fb.className='fb show '+(ok?'ok':'err');fb.style.display='block';fb.innerHTML=`<span class="tag ${ok?'tag-g':'tag-r'}">${ok?'✓':'✗'}</span>${!ok?` <span class="tag tag-a">Answer: ${as[0]}</span>`:''}<br><br><span style="font-size:12px;color:var(--text)">${q.exp}</span>`;}
+  document.getElementById('dp-check').style.display='none';document.getElementById('dp-next').style.display='flex';
+}
+function nextDiag(){di++;if(di>=DIAG.length){showDR();return;}renderDQ();}
+async function showDR(){
+  document.getElementById('diag-sess').style.display='none';
+  document.getElementById('diag-result').style.display='block';
+  const nw=DIAG.filter(function(q){return !q.isWriting;}).length;
+  const pct=Math.round((dc/nw)*100);
+  const g=pct>=80?'Strong C1 — start from Level 5':pct>=60?'Solid — start from Level 3':pct>=40?'Building up — start from Level 2':'Start from Level 1 foundations';
+  document.getElementById('dr-summary').textContent=dc+'/'+nw+' correct · '+pct+'% · '+g;
+  document.getElementById('dr-detail').innerHTML='<div class="skill-row"><span class="skill-name" style="font-size:12px">Use of English</span><div class="skill-bg"><div class="skill-fill" style="width:'+pct+'%"></div></div><span class="skill-pct">'+pct+'%</span></div><div style="font-size:12px;color:var(--muted);margin-top:8px">'+(pct>=70?'Good foundation — focus on KWT and reading depth.':'Daily Use of English drilling improves fastest.')+'</div>';
+  if(dw){
+    const wfb=document.getElementById('dr-wfb');
+    wfb.innerHTML='<span class="dots">Analysing writing</span>';
+    try{
+      const diagPrompt='CAE examiner. 3 bullet points on this paragraph (max 10 words each):\n"'+dw+'"\nVocab range, grammar accuracy, argument clarity. Then: band (1-5) + one improvement.';
+      const t=await ai(diagPrompt,'Ultra-brief.',400);
+      wfb.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Writing feedback</div>'
+        +'<div style="font-size:13px;line-height:1.7;color:var(--muted)">'+t.split('\n').join('<br>')+'</div>';
+    }catch(e){wfb.style.display='none';}
+  }
+  S.diagDone=true;save();
+}
+function finishDiag(){document.getElementById('bnav').style.display='flex';goTab('path');}
+
+// CELEBRATION
+function showCel(pct){const cel=document.getElementById('cel');document.getElementById('cel-i').textContent=pct>=80?'🏆':pct>=60?'🎉':'💪';document.getElementById('cel-t').textContent=pct>=80?'Excellent!':pct>=60?'Well done!':'Keep at it!';document.getElementById('cel-s').textContent=pct>=80?'Grade A territory.':pct>=60?'Solid session.':'Every rep builds the skill.';cel.classList.add('show');}
+function closeCel(){document.getElementById('cel').classList.remove('show');}
+const TIPS=['KWT: 3–6 words. Never change the key word.','Open cloze: one word only.','Grade A needs ~80%+.','Word formation: master un-, dis-, mis-, -tion, -ive.','Collocations: raise awareness, come to light, make headway.','Reading: questions first, then locate answers.'];
+function getTip(){return TIPS[Math.floor(Math.random()*TIPS.length)];}
+
+function resetKey(){ANTHROPIC_KEY='';localStorage.removeItem('cae_api_key');alert('API key cleared. Enter a new one next time you use AI.');}
+
+// INIT
+load();
+if(S.diagDone){document.getElementById('bnav').style.display='flex';goTab('path');}
+else document.getElementById('page-diag').classList.add('active');
+
+
+
+
+
+</script>
+</body>
+</html>
